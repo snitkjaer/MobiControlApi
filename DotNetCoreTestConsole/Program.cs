@@ -27,12 +27,12 @@ namespace DotNetCoreTestConsole
             string ClientId = "";
             string ClientSecret = "";
             // Create in the SOTI MobiControl user management - must be admin
-            string User = "";
+            string Username = "";
             string Password = "";
                      
 			try
 			{
-				Api mcApi = new Api(FQDN, ClientId, ClientSecret, User, Password);
+				Api mcApi = new Api(FQDN, ClientId, ClientSecret, Username, Password);
                 // Get device groups json
 				string resultJson = await mcApi.GetJsonAsync("devicegroups");
 				Console.Write(resultJson);

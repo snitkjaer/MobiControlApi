@@ -22,8 +22,7 @@ namespace MobiControlApi.Shared
 	public class Authentication
 	{
 		Uri baseUri;
-		string ClientId;
-		string ClientSecret;
+		Config config;
 		string grant_type;
 	    string Token;
 		DateTime TokenExpireTime;
@@ -32,16 +31,15 @@ namespace MobiControlApi.Shared
 		private static readonly HttpClient httpClient = new HttpClient();
 
         // Constructor
-		public Authentication(string FQDN, string ClientId, string ClientSecret, string User, string Password)
+		public Authentication(Config config)
         {
-			this.baseUri = new Uri("https://" + FQDN);
+			this.baseUri = new Uri("https://" + config.FQDN);
            
-            //
-            this.ClientId = ClientId;
-            this.ClientSecret = ClientSecret;
-
+            // Save config
+			this.config = config;
+            
             //grant_type=password&username=Administrator&password=1
-            grant_type = "grant_type=password&username=" + User + "&password=" + Password;
+            grant_type = "grant_type=password&username=" + config.Username + "&password=" + config.Password;
             
         }
         
@@ -49,7 +47,7 @@ namespace MobiControlApi.Shared
 		public async Task<string> GetAuthenticationHeader()
         {
 			ValidateToken();
-
+            
             // If Token is null or expired
             if (Token == null)
             {
@@ -100,7 +98,7 @@ namespace MobiControlApi.Shared
                         "Basic",
                         Convert.ToBase64String(
                             Encoding.ASCII.GetBytes(
-                                            string.Format("{0}:{1}", ClientId, ClientSecret))));
+                                            string.Format("{0}:{1}", config.ClientId, config.ClientSecret))));
 
                 // try to get token from MobiControl server
                 var bearerResult = await httpClient.SendAsync(requestToken);
