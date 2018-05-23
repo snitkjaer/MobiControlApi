@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Net.Http;
+using Newtonsoft.Json.Linq;
 
 namespace MobiControlApi.Shared
 {
@@ -21,10 +22,20 @@ namespace MobiControlApi.Shared
            
         }      
 
-		public Api(string jsonConfig)
+		public Api(JObject jsonConfig)
         {
 			// Create config object
-			config = Config.GetConfig(jsonConfig);
+			config = Config.GetConfigFromJObject(jsonConfig);
+
+            // Create Authentication object
+            authentication = new Authentication(config);
+           
+        }  
+
+		public Api(string jsonConfig)
+        {
+            // Create config object
+			config = Config.GetConfigFromJsonString(jsonConfig);
 
             // Create Authentication object
             authentication = new Authentication(config);

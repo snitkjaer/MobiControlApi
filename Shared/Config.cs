@@ -1,5 +1,6 @@
 ﻿using System;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace MobiControlApi.Shared
 {
@@ -40,10 +41,15 @@ namespace MobiControlApi.Shared
 
         */
 
-		public static Config GetConfig(string jsonConfig)
+		public static Config GetConfigFromJObject(JObject jsonConfig)
 		{
-			return JsonConvert.DeserializeObject<Config>(jsonConfig);
+			return jsonConfig.ToObject<Config>();
 		}
+
+		public static Config GetConfigFromJsonString(string jsonConfig)
+        {
+            return JsonConvert.DeserializeObject<Config>(jsonConfig);
+        }
 
     }
 }
