@@ -7,15 +7,8 @@ namespace DotNetCoreTestConsole
 {
     class Program
     {
-        static void Main(string[] args)
+		public static async Task Main(string[] args)
         {
-			Task t = new Task(BasicTest);
-            t.Start();
-			Console.ReadLine();
-        }
-
-		static async void BasicTest()
-		{
             //
             // You need to change these values to match your environment
             //
@@ -36,12 +29,14 @@ namespace DotNetCoreTestConsole
                 // Get device groups json
 				string resultJson = await mcApi.GetJsonAsync("devicegroups");
 				Console.Write(resultJson);
+
 			}
 			catch (Exception ex)
             {
                 Console.Write(ex.ToString());
             }
 
+			Console.ReadLine();
 
 		}
     }

@@ -44,7 +44,7 @@ namespace MobiControlApi.Shared
         }
         
 		// Get authentication header
-		public async Task<string> GetAuthenticationHeader()
+		public async Task<string> GetAuthenticationToken()
         {
 			ValidateToken();
             
