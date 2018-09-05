@@ -12,6 +12,5 @@
     <Compile Include="$(MSBuildThisFileDirectory)Api.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Authentication.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Config.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)RefitApi.cs" />
   </ItemGroup>
 </Project>
