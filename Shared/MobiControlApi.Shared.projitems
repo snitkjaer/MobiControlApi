@@ -6,11 +6,15 @@
     <SharedGUID>{A93CDC4B-B0E4-4FD6-B16B-608DE00EBC90}</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>MobiControlApi.Shared</Import_RootNamespace>
+    <Import_RootNamespace>MobiControlApi</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Api.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Authentication.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Config.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MonitorSotiFolderEvents.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MonitorSotiFolders.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MonitorSotiFolder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MonitorSotiFolderConfig.cs" />
   </ItemGroup>
 </Project>

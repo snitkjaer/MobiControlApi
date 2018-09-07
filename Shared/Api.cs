@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -46,7 +47,7 @@ namespace MobiControlApi
 
 		// This is the lowest level of the API - accepting raw resource path and retruning a json string
         #region low level API 
-		public async Task<string> GetJsonAsync(string resourcePath)
+		public async Task<string> GetJsonAsync(string resourcePath, CancellationToken cancellationToken)
         {         
 			string token = await authentication.GetAuthenticationToken();
 			if (token == null)
@@ -54,14 +55,16 @@ namespace MobiControlApi
 
 			httpClient.DefaultRequestHeaders.Clear();
 			httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                     
+                    
+            // Create http request 
 			var request = new HttpRequestMessage
             {
 				Method = HttpMethod.Get,
 				RequestUri = new Uri(config.baseUri, resourcePath)
             };            
-            
-            HttpResponseMessage response = await httpClient.SendAsync(request);
+
+            // Send http request
+            HttpResponseMessage response = await httpClient.SendAsync(request, cancellationToken);
             if (response.IsSuccessStatusCode)            
 				return await response.Content.ReadAsStringAsync();
 			else
@@ -98,7 +101,7 @@ namespace MobiControlApi
 
         #endregion
 
-		public async Task<string> GetDeviceListJsonAsync(string deviceGroupPath)
+		public async Task<string> GetDeviceListJsonAsync(string deviceGroupPath, CancellationToken cancellationToken)
         {
 
 			deviceGroupPath = deviceGroupPath.Replace(" ", "%2520").Replace("/", "%255C");
@@ -107,13 +110,12 @@ namespace MobiControlApi
 			string resourcePath = "devices?path=%255C" + deviceGroupPath; // "MARK%255CZebra%2520TC56";
 
 			// Call GetJsonAsync
-			return await GetJsonAsync(resourcePath);
+			return await GetJsonAsync(resourcePath, cancellationToken);
 
            
         }
 
-
-		public async Task<bool> SendActionToDevicesAsync(string deviceId,string Action, string Message)
+        public async Task<bool> SendActionToDevicesAsync(string deviceId,string Action, string Message)
         {
 			// POST /devices/actions/DeviceIds
 
