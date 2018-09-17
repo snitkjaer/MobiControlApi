@@ -97,11 +97,37 @@ namespace MobiControlApi
             else
                 return false;
         }
-        
+
+        public async Task<bool> PutJsonAsync(string resourcePath, string body)
+        {
+            string token = await authentication.GetAuthenticationToken();
+            if (token == null)
+                return false;
+
+            httpClient.DefaultRequestHeaders.Clear();
+            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Put,
+                RequestUri = new Uri(config.baseUri, resourcePath),
+                Content = new StringContent(body),
+
+
+            };
+            request.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json") { CharSet = "UTF-8" };
+
+            HttpResponseMessage response = await httpClient.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+                return true;
+            else
+                return false;
+        }
+
 
         #endregion
 
-		public async Task<string> GetDeviceListJsonAsync(string deviceGroupPath, CancellationToken cancellationToken)
+        public async Task<string> GetDeviceListJsonAsync(string deviceGroupPath, CancellationToken cancellationToken)
         {
 
 			deviceGroupPath = deviceGroupPath.Replace(" ", "%2520").Replace("/", "%255C");
@@ -122,27 +148,67 @@ namespace MobiControlApi
 			List<string> deviceIds = new List<string>();
 			deviceIds.Add(deviceId);
             
-
 			ActionBody actionBody = new ActionBody(deviceIds, new ActionInfo(Action, Message));
-
 
             // Generate resourcePath
 			string resourcePath = "devices/actions";
 			string actionBodyJson = actionBody.ToJsonString();
             // Call GetJsonAsync
 			return await PostJsonAsync(resourcePath, actionBodyJson);
+        }
+
+        public async Task<string> GetCustomAttributesAsync(string deviceId, CancellationToken cancellationToken)
+        {
+            // GET /devices/{deviceId}/customAttributes
+
+            List<string> deviceIds = new List<string>();
+            deviceIds.Add(deviceId);
+
+            // Generate resourcePath
+            string resourcePath = "devices/" + deviceId + "/customAttributes";
+
+            // Call GetJsonAsync
+            return await GetJsonAsync(resourcePath, cancellationToken);
+        }
 
 
+        public async Task<bool> SetCustomAttributeAsync(string deviceId, string customAttributeId, string customAttributeValue)
+        {
+            // PUT /devices/{deviceId}/customAttributes/{customAttributeId}
+
+            List<string> deviceIds = new List<string>();
+            deviceIds.Add(deviceId);
+
+            // Generate resourcePath
+            string resourcePath = "devices/" + deviceId + "/customAttributes/" + customAttributeId;
+            string CustomAttributeBodyJson = new CustomAttributeBody(customAttributeValue).ToJsonString();
+            // Call GetJsonAsync
+            return await PutJsonAsync(resourcePath, CustomAttributeBodyJson);
         }
 
 
 
 
-
-              
     }
 
-	public class ActionBody
+
+    public class CustomAttributeBody
+    {
+        public string customAttributeValue;
+
+        public CustomAttributeBody(string customAttributeValue)
+        {
+            this.customAttributeValue = customAttributeValue;
+        }
+
+        public string ToJsonString()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+    }
+
+
+    public class ActionBody
     {
 		public List<string> DeviceIds;
 		public ActionInfo ActionInfo;

@@ -100,17 +100,17 @@ namespace MobiControlApi
 
         }
 
-        private void MonitorSotiGroup_RemovedDeviceList(object sender, List<string> listRemovedDeviceIds)
+        protected void MonitorSotiGroup_RemovedDeviceList(object sender, List<string> listRemovedDeviceIds)
         {
             OnRemovedDeviceList(sender, listRemovedDeviceIds);
         }
 
-        private void MonitorSotiGroup_NewDeviceList(object sender, List<string> listNewDeviceIds)
+        protected void MonitorSotiGroup_NewDeviceList(object sender, List<string> listNewDeviceIds)
         {
             OnNewDeviceList(sender, listNewDeviceIds);
         }
 
-        private void MonitorSotiGroup_NewDeviceDict(object sender, Dictionary<string, JObject> dirNewDevices)
+        protected void MonitorSotiGroup_NewDeviceDict(object sender, Dictionary<string, JObject> dirNewDevices)
         {
             OnNewDeviceDict(sender, dirNewDevices);
         }
