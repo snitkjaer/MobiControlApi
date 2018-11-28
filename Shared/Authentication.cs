@@ -22,7 +22,7 @@ namespace MobiControlApi
 	public class Authentication
 	{
 		Uri baseUri;
-		Config config;
+		MobiControlApiConfig config;
 		string grant_type;
 	    string Token;
 		DateTime TokenExpireTime;
@@ -31,7 +31,7 @@ namespace MobiControlApi
 		private static readonly HttpClient httpClient = new HttpClient();
 
         // Constructor
-		public Authentication(Config config)
+		public Authentication(MobiControlApiConfig config)
         {
 			this.baseUri = new Uri("https://" + config.FQDN);
            

@@ -1,9 +1,9 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MobiControlApi.Shared", "Shared\MobiControlApi.Shared.shproj", "{A93CDC4B-B0E4-4FD6-B16B-608DE00EBC90}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobiControlApi.DotNetCoreTestConsole", "DotNetCoreTestConsole\MobiControlApi.DotNetCoreTestConsole.csproj", "{60356C84-4B37-42BF-B7E9-2782BDDCBD4E}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MobiControlApi", "Shared\MobiControlApi.shproj", "{A93CDC4B-B0E4-4FD6-B16B-608DE00EBC90}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

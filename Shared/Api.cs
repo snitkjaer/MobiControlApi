@@ -10,7 +10,7 @@ namespace MobiControlApi
 {
     public class Api
     {
-		Config config;
+		MobiControlApiConfig config;
 
 		private static readonly HttpClient httpClient = new HttpClient();
 		Authentication authentication;
@@ -18,7 +18,7 @@ namespace MobiControlApi
 		public Api(string FQDN, string ClientId, string ClientSecret, string Username, string Password)
         {         
             // Create config object
-			config = new Config(FQDN, ClientId, ClientSecret, Username, Password);
+			config = new MobiControlApiConfig(FQDN, ClientId, ClientSecret, Username, Password);
 
 			// Create Authentication object
 			authentication = new Authentication(config);
@@ -28,7 +28,7 @@ namespace MobiControlApi
 		public Api(JObject jsonConfig)
         {
 			// Create config object
-			config = Config.GetConfigFromJObject(jsonConfig);
+			config = MobiControlApiConfig.GetConfigFromJObject(jsonConfig);
 
             // Create Authentication object
             authentication = new Authentication(config);
@@ -38,7 +38,7 @@ namespace MobiControlApi
 		public Api(string jsonConfig)
         {
             // Create config object
-			config = Config.GetConfigFromJsonString(jsonConfig);
+			config = MobiControlApiConfig.GetConfigFromJsonString(jsonConfig);
 
             // Create Authentication object
             authentication = new Authentication(config);
@@ -46,7 +46,7 @@ namespace MobiControlApi
         }
 
 		// This is the lowest level of the API - accepting raw resource path and retruning a json string
-        #region low level API 
+        #region low level SOTI REST Web API 
 		public async Task<string> GetJsonAsync(string resourcePath, CancellationToken cancellationToken)
         {         
 			string token = await authentication.GetAuthenticationToken();
@@ -139,6 +139,162 @@ namespace MobiControlApi
 			return await GetJsonAsync(resourcePath, cancellationToken);
 
            
+        }
+
+        // Get device list for specific group using /device/search MC 14+ API
+        private async Task<string> GetDeviceListJsonAsync2(string deviceGroupPath, string filter, bool includeSubgroups, bool verifyAndSync, int skip, int take, CancellationToken cancellationToken)
+        {
+
+            // Generate resourcePath
+            string resourcePath = "devices/search?path=%255C" + deviceGroupPath.Replace(" ", "%2520").Replace("/", "%255C");
+
+            if(!String.IsNullOrEmpty(filter))
+                resourcePath += "&filter=" + filter.Replace(" ", "%2520").Replace("/", "%255C");
+
+            if (includeSubgroups)
+                resourcePath += "&includeSubgroups=true";
+
+            resourcePath += 
+                "&skip=" + skip.ToString()
+                + "&take=" + take.ToString();
+
+
+
+            // Call GetJsonAsync
+            return await GetJsonAsync(resourcePath, cancellationToken);
+
+
+        }
+
+
+        public async Task<List<string>> GetDeviceIdListAsync(string deviceGroupPath, bool includeSubgroups, CancellationToken cancellationToken)
+        {
+            List<string> listDeviceIds = new List<string>();
+
+            int deviceOffset = 0;
+            int deviceBatchSize = 50;
+
+            while(true)
+            {
+                // Get devices in SOTI folder
+                string resultJson = await GetDeviceListJsonAsync2(deviceGroupPath, null, includeSubgroups, true, deviceOffset, deviceOffset + deviceBatchSize, cancellationToken);
+
+                // If we got a result - parse it
+                if (resultJson != null)
+                {
+                    // String to json array
+                    JArray devices = JArray.Parse(resultJson);
+
+                    // Itterate over device found
+                    foreach (JObject device in devices)
+                    {
+                        // deviceId
+                        string deviceId = (string)device["DeviceId"];
+
+                        if (!String.IsNullOrEmpty(deviceId))
+                            listDeviceIds.Add(deviceId);
+                    }
+
+                    // Do we expect more devices?
+                    if (devices.Count == deviceBatchSize)
+                        deviceOffset += deviceBatchSize;
+                    else
+                        break;
+                }
+                else
+                    break;
+
+
+            }
+
+            return listDeviceIds;
+        }
+
+        public async Task<Dictionary<string, JObject>> GetDeviceIdJsonDictAync(string deviceGroupPath, bool includeSubgroups, CancellationToken cancellationToken)
+        {
+            Dictionary<string, JObject> dirDevices = new Dictionary<string, JObject>();
+
+            int deviceOffset = 0;
+            int deviceBatchSize = 50;
+
+            while (true)
+            {
+                // Get devices in SOTI folder
+                string resultJson = await GetDeviceListJsonAsync2(deviceGroupPath, null, includeSubgroups, true, deviceOffset, deviceOffset + deviceBatchSize, cancellationToken);
+
+                // If we got a result - parse it
+                if (resultJson != null)
+                {
+                    // String to json array
+                    JArray devices = JArray.Parse(resultJson);
+
+                    // Itterate over device found
+                    foreach (JObject device in devices)
+                    {
+                        // deviceId
+                        string deviceId = (string)device["DeviceId"];
+
+                        if (!String.IsNullOrEmpty(deviceId))
+                            dirDevices.Add(deviceId, device);
+                    }
+
+                    // Do we expect more devices?
+                    if (devices.Count == deviceBatchSize)
+                        deviceOffset += deviceBatchSize;
+                    else
+                        break;
+                }
+                else
+                    break;
+
+
+            }
+
+            return dirDevices;
+        }
+
+
+        public async Task<List<Device>> GetDeviceListAsync(string deviceGroupPath, bool includeSubgroups, CancellationToken cancellationToken)
+        {
+            List<Device> listDevices = new List<Device>();
+
+            int deviceOffset = 0;
+            int deviceBatchSize = 50;
+
+            while (true)
+            {
+                // Get devices in SOTI folder
+                string resultJson = await GetDeviceListJsonAsync2(deviceGroupPath, null, includeSubgroups, true, deviceOffset, deviceOffset + deviceBatchSize, cancellationToken);
+
+                // If we got a result - parse it
+                if (resultJson != null)
+                {
+                    // String to json array
+                    JArray devices = JArray.Parse(resultJson);
+
+                    // Itterate over device found
+                    foreach (JObject deviceJson in devices)
+                    {
+                        // deviceId
+                        Device device = Device.FromJson(deviceJson.ToString());
+
+                        if (device != null)
+                            listDevices.Add(device);
+                    }
+
+                    // Do we expect more devices?
+                    if (devices.Count == deviceBatchSize)
+                        deviceOffset += deviceBatchSize;
+                    else
+                        break;
+                }
+                else
+                    break;
+
+
+            }
+
+            return listDevices;
         }
 
         public async Task<bool> SendActionToDevicesAsync(string deviceId,string Action, string Message)

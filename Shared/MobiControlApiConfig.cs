@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace MobiControlApi
 {
-    public class Config
+    public class MobiControlApiConfig
     {
 		// The is fully qualified domain name for the server
         public string FQDN = "server.domain.tld";
@@ -18,7 +18,7 @@ namespace MobiControlApi
 
 		public Uri baseUri => new Uri("https://" + FQDN + "/MobiControl/api/");
 
-		public Config(string fQDN, string clientId, string clientSecret, string username, string password)
+		public MobiControlApiConfig(string fQDN, string clientId, string clientSecret, string username, string password)
 		{
 			FQDN = fQDN;
 			ClientId = clientId;
@@ -41,14 +41,14 @@ namespace MobiControlApi
 
         */
 
-		public static Config GetConfigFromJObject(JObject jsonConfig)
+		public static MobiControlApiConfig GetConfigFromJObject(JObject jsonConfig)
 		{
-			return jsonConfig.ToObject<Config>();
+			return jsonConfig.ToObject<MobiControlApiConfig>();
 		}
 
-		public static Config GetConfigFromJsonString(string jsonConfig)
+		public static MobiControlApiConfig GetConfigFromJsonString(string jsonConfig)
         {
-            return JsonConvert.DeserializeObject<Config>(jsonConfig);
+            return JsonConvert.DeserializeObject<MobiControlApiConfig>(jsonConfig, new TimeSpanConverter());
         }
 
     }

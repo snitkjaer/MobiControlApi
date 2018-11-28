@@ -11,10 +11,12 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Api.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Authentication.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Config.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Device.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MobiControlApiConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonitorSotiFolderEvents.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonitorSotiFolders.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonitorSotiFolder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonitorSotiFolderConfig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimeSpanConverter.cs" />
   </ItemGroup>
 </Project>

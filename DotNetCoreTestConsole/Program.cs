@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using MobiControlApi.Shared;
+using MobiControlApi;
 
 
 namespace DotNetCoreTestConsole
