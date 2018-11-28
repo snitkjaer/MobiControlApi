@@ -85,52 +85,66 @@ namespace MobiControlApi
                 try
                 {
                     Dictionary<string, JObject> dirNewKnownDevices = new Dictionary<string, JObject>();
-                    // Save
                     List<string> listKnownDeviceIdsAtLastScan = listKnownDeviceIds;
 
                     // reset temp dict and list
                     dictNewDevices = new Dictionary<string, JObject>();
                     listRemovedDeviceIds = listKnownDeviceIds;  // Set to all known - found devices will be removed leaving remove
 
-                    // Get device in SOTI folder and update known devices
-                    dirNewKnownDevices = await mcApi.GetDeviceIdJsonDictAync(monitorSotiGroupConfig.FolderPath, false, cancellationToken);
+                    // Get device in SOTI folder
+                    string resultJson = await mcApi.GetDeviceListJsonAsync(monitorSotiGroupConfig.FolderPath, cancellationToken);
 
-                    // Itterate over device found
-                    foreach (var device in dirNewKnownDevices)
+                    // If we got a result - parse it
+                    if (resultJson != null)
                     {
-                        // We need to find:
-                        // - Newly added devices
-                        // - Removed devices
+                        // String to json array
+                        JArray devices = JArray.Parse(resultJson);
 
-                        // If device id is known
-                        if (listKnownDeviceIdsAtLastScan.Contains(device.Key))
+                        // Itterate over device found
+                        foreach (JObject device in devices)
                         {
-                            // Device id is known and was found in latest folder scan (or initial given list)
-                            // -> Remove it for the removed list
-                            listRemovedDeviceIds.Remove(device.Key);
+                            // deviceId
+                            string deviceId = (string)device["DeviceId"];
+
+                            // We need to find:
+                            // - Newly added devices
+                            // - Removed devices
+
+                            // Add all to new know devices
+                            dirNewKnownDevices.Add(deviceId, device);
+
+                            // If device id is known
+                            if (listKnownDeviceIdsAtLastScan.Contains(deviceId))
+                            {
+                                // Device id is known and was found in latest folder scan (or initial given list)
+                                // -> Remove it for the removed list
+                                listRemovedDeviceIds.Remove(deviceId);
+                            }
+                            else
+                            {
+                                // Device is in unknown
+                                // Add to new devices dict
+                                dictNewDevices.Add(deviceId, device);
+
+                            }
                         }
-                        else
+
+                        // Update to make sure is has the latest device info
+                        dictKnownDevices = dirNewKnownDevices;
+
+                        // If new devices was found
+                        if (dictNewDevices.Count > 0)
                         {
-                            // Device is in unknown
-                            // Add to new devices dict
-                            dictNewDevices.Add(device.Key, device.Value);
-
+                            OnNewDeviceList(this, listNewDeviceIds);
+                            OnNewDeviceDict(this, dictNewDevices);
                         }
+
+                        // If devices were removed
+                        if (listRemovedDeviceIds.Count > 0)
+                            OnRemovedDeviceList(this, listRemovedDeviceIds);
+
+
                     }
-
-                    // If new devices was found
-                    if (dictNewDevices.Count > 0)
-                    {
-                        OnNewDeviceList(this, listNewDeviceIds);
-                        OnNewDeviceDict(this, dictNewDevices);
-                    }
-
-                    // If devices were removed
-                    if (listRemovedDeviceIds.Count > 0)
-                        OnRemovedDeviceList(this, listRemovedDeviceIds);
-
-
-
 
                 }
                 catch (Exception e)
@@ -143,7 +157,7 @@ namespace MobiControlApi
                 /*
                 else
                     OnDoneWatching(this);
-                    */                   
+                    */
             }
             while (!cancellationToken.IsCancellationRequested);
 
