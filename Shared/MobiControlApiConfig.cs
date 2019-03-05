@@ -51,5 +51,10 @@ namespace MobiControlApi
             return JsonConvert.DeserializeObject<MobiControlApiConfig>(jsonConfig, new TimeSpanConverter());
         }
 
+        public static MobiControlApiConfig GetConfigFromJsonFile(string jsonConfigFilePath)
+        {
+            return JsonConvert.DeserializeObject<MobiControlApiConfig>(System.IO.File.ReadAllText(jsonConfigFilePath), new TimeSpanConverter());
+        }
+
     }
 }

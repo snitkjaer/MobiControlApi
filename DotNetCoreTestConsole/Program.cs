@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MobiControlApi;
 
@@ -9,12 +10,15 @@ namespace DotNetCoreTestConsole
     {
 		public static async Task Main(string[] args)
         {
+            // Create the token source.
+            CancellationTokenSource cts = new CancellationTokenSource();
+
             //
             // You need to change these values to match your environment
             //
 
-			// The is fully qualified domain name for the server
-			string FQDN = "server.domain.tld";
+            // The is fully qualified domain name for the server
+            string FQDN = "server.domain.tld";
 
 			// Needs to be generated on SOTI MobiControl server using MCadmin.exe
             string ClientId = "";
@@ -27,7 +31,7 @@ namespace DotNetCoreTestConsole
 			{
 				Api mcApi = new Api(FQDN, ClientId, ClientSecret, Username, Password);
                 // Get device groups json
-				string resultJson = await mcApi.GetJsonAsync("devicegroups");
+				string resultJson = await mcApi.GetJsonAsync("devicegroups",cts.Token);
 				Console.Write(resultJson);
 
 			}

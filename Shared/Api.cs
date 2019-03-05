@@ -15,7 +15,17 @@ namespace MobiControlApi
 		private static readonly HttpClient httpClient = new HttpClient();
 		Authentication authentication;
 
-		public Api(string FQDN, string ClientId, string ClientSecret, string Username, string Password)
+        public Api(MobiControlApiConfig mobiControlApiConfig)
+        {
+            // Create config object
+            config = mobiControlApiConfig;
+
+            // Create Authentication object
+            authentication = new Authentication(config);
+
+        }
+
+        public Api(string FQDN, string ClientId, string ClientSecret, string Username, string Password)
         {         
             // Create config object
 			config = new MobiControlApiConfig(FQDN, ClientId, ClientSecret, Username, Password);
@@ -127,7 +137,8 @@ namespace MobiControlApi
 
         #endregion
 
-        public async Task<string> GetDeviceListJsonAsync(string deviceGroupPath, CancellationToken cancellationToken)
+        // Get device list for specific group using /device MC 13+ API (reads directly from SOTI SQL DB)
+        private async Task<string> GetDeviceListJsonFromSotiDbAsync(string deviceGroupPath, int skip, int take, CancellationToken cancellationToken)
         {
 
 			deviceGroupPath = deviceGroupPath.Replace(" ", "%2520").Replace("/", "%255C");
@@ -135,24 +146,31 @@ namespace MobiControlApi
 			// Generate resourcePath
 			string resourcePath = "devices?path=%255C" + deviceGroupPath; // "MARK%255CZebra%2520TC56";
 
-			// Call GetJsonAsync
-			return await GetJsonAsync(resourcePath, cancellationToken);
+            resourcePath +=
+                "&skip=" + skip.ToString()
+                + "&take=" + take.ToString();
+
+            // Call GetJsonAsync
+            return await GetJsonAsync(resourcePath, cancellationToken);
 
            
         }
 
-        // Get device list for specific group using /device/search MC 14+ API
-        private async Task<string> GetDeviceListJsonAsync2(string deviceGroupPath, string filter, bool includeSubgroups, bool verifyAndSync, int skip, int take, CancellationToken cancellationToken)
+        // Get device list for specific group using /device/search MC 14+ API (reads eleatic search DB)
+        private async Task<string> GetDeviceListJsonSearchDbAsync(string deviceGroupPath, string filter, bool includeSubgroups, bool verifyAndSync, int skip, int take, CancellationToken cancellationToken)
         {
 
             // Generate resourcePath
-            string resourcePath = "devices/search?path=%255C" + deviceGroupPath.Replace(" ", "%2520").Replace("/", "%255C");
+            //string resourcePath = "devices/search?path=%255C" + deviceGroupPath.Replace(" ", "%2520").Replace("/", "%255C");
 
-            if(!String.IsNullOrEmpty(filter))
+            string resourcePath = "devices/search?path=" + deviceGroupPath;
+
+            if (!String.IsNullOrEmpty(filter))
                 resourcePath += "&filter=" + filter.Replace(" ", "%2520").Replace("/", "%255C");
 
-            if (includeSubgroups)
-                resourcePath += "&includeSubgroups=true";
+           // if (includeSubgroups)
+            
+            resourcePath += "&includeSubgroups="+ includeSubgroups.ToString().ToLower();
 
             resourcePath += 
                 "&skip=" + skip.ToString()
@@ -163,9 +181,9 @@ namespace MobiControlApi
             // Call GetJsonAsync
             return await GetJsonAsync(resourcePath, cancellationToken);
 
-
         }
 
+        public bool useSearchDbToGetDevices = false;
 
         public async Task<List<string>> GetDeviceIdListAsync(string deviceGroupPath, bool includeSubgroups, CancellationToken cancellationToken)
         {
@@ -173,11 +191,15 @@ namespace MobiControlApi
 
             int deviceOffset = 0;
             int deviceBatchSize = 50;
+            string resultJson = null;
 
-            while(true)
+            while (true)
             {
                 // Get devices in SOTI folder
-                string resultJson = await GetDeviceListJsonAsync2(deviceGroupPath, null, includeSubgroups, true, deviceOffset, deviceOffset + deviceBatchSize, cancellationToken);
+                if(useSearchDbToGetDevices)
+                    resultJson = await GetDeviceListJsonSearchDbAsync(deviceGroupPath, null, includeSubgroups, true, deviceOffset, deviceOffset + deviceBatchSize, cancellationToken);
+                else
+                    resultJson = await GetDeviceListJsonFromSotiDbAsync(deviceGroupPath, deviceOffset, deviceOffset + deviceBatchSize, cancellationToken);
 
                 // If we got a result - parse it
                 if (resultJson != null)
@@ -210,6 +232,7 @@ namespace MobiControlApi
             return listDeviceIds;
         }
 
+        /*
         public async Task<Dictionary<string, JObject>> GetDeviceIdJsonDictAync(string deviceGroupPath, bool includeSubgroups, CancellationToken cancellationToken)
         {
             Dictionary<string, JObject> dirDevices = new Dictionary<string, JObject>();
@@ -252,19 +275,25 @@ namespace MobiControlApi
 
             return dirDevices;
         }
+        */
 
-
-        public async Task<List<Device>> GetDeviceListAsync(string deviceGroupPath, bool includeSubgroups, CancellationToken cancellationToken)
+        public async Task<List<Device>> GetDeviceListAsync(string deviceGroupPath, CancellationToken cancellationToken)
         {
             List<Device> listDevices = new List<Device>();
 
             int deviceOffset = 0;
             int deviceBatchSize = 50;
+            string resultJson = null;
 
             while (true)
             {
                 // Get devices in SOTI folder
-                string resultJson = await GetDeviceListJsonAsync2(deviceGroupPath, null, includeSubgroups, true, deviceOffset, deviceOffset + deviceBatchSize, cancellationToken);
+                // Get devices in SOTI folder
+                if (useSearchDbToGetDevices)
+                    resultJson = await GetDeviceListJsonSearchDbAsync(deviceGroupPath, null, false, true, deviceOffset, deviceOffset + deviceBatchSize, cancellationToken);
+                else
+                    resultJson = await GetDeviceListJsonFromSotiDbAsync(deviceGroupPath, deviceOffset, deviceOffset + deviceBatchSize, cancellationToken);
+
 
                 // If we got a result - parse it
                 if (resultJson != null)
@@ -296,6 +325,8 @@ namespace MobiControlApi
 
             return listDevices;
         }
+
+
 
         public async Task<bool> SendActionToDevicesAsync(string deviceId,string Action, string Message)
         {

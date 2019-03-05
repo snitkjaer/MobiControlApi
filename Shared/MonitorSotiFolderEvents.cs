@@ -23,22 +23,6 @@ namespace MobiControlApi
         }
         #endregion
 
-        #region NewDeviceDict Event
-        // Delegate
-        public delegate void NewDeviceDictEventHandler(object sender, Dictionary<string, JObject> dirNewDevices);
-
-        // The event
-        public event NewDeviceDictEventHandler NewDeviceDict;
-
-        // The method which fires the Event
-        protected void OnNewDeviceDict(object sender, Dictionary<string, JObject> dirNewDevices)
-        {
-            // Check if there are any Subscribers
-            // Call the Event
-            NewDeviceDict?.Invoke(sender, dirNewDevices);
-        }
-        #endregion
-
 
         #region RemovedDeviceList Event
         // Delegate

@@ -42,7 +42,6 @@ namespace MobiControlApi
             {
                 // Start monitoring folder but dont pass any know devices i.e. on start (or restart) all will come up as new devices
                 MonitorSotiFolder monitorSotiGroup = new MonitorSotiFolder(group.ToString(), null);
-                monitorSotiGroup.NewDeviceDict += MonitorSotiGroup_NewDeviceDict;
                 monitorSotiGroup.NewDeviceList += MonitorSotiGroup_NewDeviceList;
                 monitorSotiGroup.RemovedDeviceList += MonitorSotiGroup_RemovedDeviceList;
                 listMonitorSotiFolder.Add(monitorSotiGroup);
@@ -138,9 +137,5 @@ namespace MobiControlApi
             OnNewDeviceList(sender, listNewDeviceIds);
         }
 
-        protected void MonitorSotiGroup_NewDeviceDict(object sender, Dictionary<string, JObject> dirNewDevices)
-        {
-            OnNewDeviceDict(sender, dirNewDevices);
-        }
     }
 }
