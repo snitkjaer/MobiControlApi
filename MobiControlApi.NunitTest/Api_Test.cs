@@ -14,7 +14,8 @@ namespace MobiControlApi.NunitTest
    
 
         [Test()]
-        public async Task DeviceCount()
+        // using /devices
+        public async Task DeviceCountSqlDb()
         {
             #region Setup conditions
             CancellationToken token;
@@ -41,6 +42,7 @@ namespace MobiControlApi.NunitTest
 
         }
 
+        // using /devices/search
         [Test()]
         public async Task DeviceCountSearchDb()
         {
