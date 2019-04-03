@@ -255,11 +255,11 @@
       <HintPath>..\packages\XPath2.Extensions.1.0.6.1\lib\net40\XPath2.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="WireMock.Net">
-      <HintPath>..\packages\WireMock.Net.1.0.7\lib\net461\WireMock.Net.dll</HintPath>
+      <HintPath>..\packages\WireMock.Net.1.0.8\lib\net461\WireMock.Net.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http.WebRequest" />
     <Reference Include="NFluent">
-      <HintPath>..\packages\NFluent.2.4.0\lib\net45\NFluent.dll</HintPath>
+      <HintPath>..\packages\NFluent.2.5.0\lib\net45\NFluent.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.Annotations">
       <HintPath>..\packages\System.ComponentModel.Annotations.4.5.0\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
@@ -273,7 +273,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Api_Test.cs" />
+    <Compile Include="ApiTest.cs" />
     <Compile Include="MonitorSotiFolder_Test.cs" />
   </ItemGroup>
   <ItemGroup>

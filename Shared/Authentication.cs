@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -7,7 +8,7 @@ using Newtonsoft.Json.Linq;
 
 namespace MobiControlApi
 {
-	/*
+    /*
 	 * Token request
 	 * 
         POST https://server.domain.tld/MobiControl/api/token HTTP/1.1
@@ -19,28 +20,36 @@ namespace MobiControlApi
         grant_type=password&username=Administrator&password=1 
     */
 
-	public class Authentication
+
+    public class Authentication
 	{
-		Uri baseUri;
+        CancellationToken cancellationToken;
+        Uri baseUri;
 		MobiControlApiConfig config;
 		string grant_type;
 	    string Token;
 		DateTime TokenExpireTime;
+        public TimeSpan httpTimeout = new TimeSpan(0, 0, 20);
 
         // HttpClient used for authentication requests
-		private static readonly HttpClient httpClient = new HttpClient();
+        private static readonly HttpClient httpClient = new HttpClient();
 
         // Constructor
-		public Authentication(MobiControlApiConfig config)
+		public Authentication(MobiControlApiConfig config, CancellationToken cancellationToken)
         {
-			this.baseUri = new Uri("https://" + config.FQDN);
+            this.cancellationToken = cancellationToken;
+
+            this.baseUri = new Uri("https://" + config.FQDN);
            
             // Save config
 			this.config = config;
             
             //grant_type=password&username=Administrator&password=1
             grant_type = "grant_type=password&username=" + config.Username + "&password=" + config.Password;
-            
+
+            httpClient.Timeout = httpTimeout;
+
+
         }
         
 		// Get authentication header
@@ -101,8 +110,8 @@ namespace MobiControlApi
                                             string.Format("{0}:{1}", config.ClientId, config.ClientSecret))));
 
                 // try to get token from MobiControl server
-                var bearerResult = await httpClient.SendAsync(requestToken);
-                var bearerData = await bearerResult.Content.ReadAsStringAsync();
+                HttpResponseMessage bearerResult = await httpClient.SendAsync(requestToken, cancellationToken);
+                string bearerData = await bearerResult.Content.ReadAsStringAsync();
 				Token = JObject.Parse(bearerData)["access_token"].ToString();
 				int expires_in = Int32.Parse(JObject.Parse(bearerData)["expires_in"].ToString());
 				TokenExpireTime = DateTime.Now.AddSeconds(expires_in - 10);

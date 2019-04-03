@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.DataContracts;
 
 namespace MobiControlApi
 {
@@ -28,9 +31,10 @@ namespace MobiControlApi
         public List<MonitorSotiFolder> listMonitorSotiFolder;
 
         // Constructor
-        public MonitorSotiFolders(JObject mobiControlApiConfigJson, JArray mobiControlGroupsToMonitorJson, CancellationToken token)
+        public MonitorSotiFolders(JObject mobiControlApiConfigJson, JArray mobiControlGroupsToMonitorJson, TelemetryClient tc, CancellationToken token)
         {
             this.token = token;
+            this.tc = tc;
             MobiControlApiConfigJson = mobiControlApiConfigJson;
             MobiControlFolderssToMonitorJson = mobiControlGroupsToMonitorJson;
 
@@ -41,7 +45,7 @@ namespace MobiControlApi
             foreach (var group in MobiControlFolderssToMonitorJson)
             {
                 // Start monitoring folder but dont pass any know devices i.e. on start (or restart) all will come up as new devices
-                MonitorSotiFolder monitorSotiGroup = new MonitorSotiFolder(group.ToString(), null);
+                MonitorSotiFolder monitorSotiGroup = new MonitorSotiFolder(group.ToString(), null, tc, token);
                 monitorSotiGroup.NewDeviceList += MonitorSotiGroup_NewDeviceList;
                 monitorSotiGroup.RemovedDeviceList += MonitorSotiGroup_RemovedDeviceList;
                 listMonitorSotiFolder.Add(monitorSotiGroup);
@@ -52,12 +56,14 @@ namespace MobiControlApi
         // List of monitoring tasks
         List<Task> listTask;
 
+        // Start monitor tasks for all folders and wait for cancellation
         public async Task Start()
         {
             try
             {
-                // Validate connnection to the MC server
-                mcApi = new Api(MobiControlApiConfigJson);
+                if (mcApi == null)
+                    // Validate connnection to the MC server
+                    mcApi = new Api(MobiControlApiConfigJson, token);
 
                 // list of monitoring tasks
                 listTask = new List<Task>();
@@ -66,7 +72,7 @@ namespace MobiControlApi
                 foreach (var group in listMonitorSotiFolder)
                 {
                     // Start task
-                    listTask.Add(group.Start(mcApi, token));
+                    listTask.Add(group.Start(mcApi));
                 }
 
                 // Wait for all tasks to complete (will happen when they are cancelled
@@ -75,18 +81,21 @@ namespace MobiControlApi
             }
             catch (Exception ex)
             {
+                Log("Exception starting MobiControl folders monitor", SeverityLevel.Error);
+                TrackException(ex);
             }
         }
 
-
+        // Get device id list for all monitored folders
         public async Task<List<string>> GetDeviceIdListAsync()
         {
             List<string> listDeviceIds = new List<string>();
 
             try
             {
-                // Validate connnection to the MC server
-                mcApi = new Api(MobiControlApiConfigJson);
+                if (mcApi == null)
+                    // Validate connnection to the MC server
+                    mcApi = new Api(MobiControlApiConfigJson, token);
 
                 // Itterate over monitored groups and return device list
                 foreach (var group in listMonitorSotiFolder)
@@ -96,22 +105,24 @@ namespace MobiControlApi
 
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-
+                TrackException(ex);
             }
 
             return listDeviceIds;
         }
 
+        // Get device list for all monitored folders
         public async Task<List<Device>> GetDeviceListAsync()
         {
             List<Device> listDevices = new List<Device>();
 
             try
             {
-                // Validate connnection to the MC server
-                mcApi = new Api(MobiControlApiConfigJson);
+                if (mcApi == null)
+                    // Validate connnection to the MC server
+                    mcApi = new Api(MobiControlApiConfigJson, token);
 
                 // Itterate over monitored groups and return device dict
                 foreach (var group in listMonitorSotiFolder)
@@ -119,9 +130,9 @@ namespace MobiControlApi
                     listDevices.AddRange(await group.GetDeviceListAsync(mcApi, token));
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-
+                TrackException(ex);
             }
 
             return listDevices;

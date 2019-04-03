@@ -5,118 +5,115 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MobiControlApi
 {
     public class Api
     {
-		MobiControlApiConfig config;
+        CancellationToken cancellationToken;
 
-		private static readonly HttpClient httpClient = new HttpClient();
-		Authentication authentication;
+        MobiControlApiConfig config;
 
-        public Api(MobiControlApiConfig mobiControlApiConfig)
+        /*
+        private readonly IHttpClientFactory httpClientFactory;
+
+        ServiceCollection services = new ServiceCollection();
+        ServiceProvider serviceProvider;
+        */
+        //private static readonly HttpClient httpClient = new HttpClient();
+        private readonly Authentication authentication;
+
+        private static TimeSpan httpTimeout = new TimeSpan(0, 0, 20);  // 20 sec
+
+        // Main constructor
+        public Api(MobiControlApiConfig mobiControlApiConfig, CancellationToken ct)
         {
             // Create config object
             config = mobiControlApiConfig;
 
-            // Create Authentication object
-            authentication = new Authentication(config);
+            // Save CancellationToken
+            cancellationToken = ct;
 
+            // Create SOTI Authentication object
+            authentication = new Authentication(config, cancellationToken);
+
+            /*
+            // Register a HTTP Client
+            services.AddHttpClient<SotiHttpClient>();
+            serviceProvider = services.BuildServiceProvider();
+            */
         }
 
-        public Api(string FQDN, string ClientId, string ClientSecret, string Username, string Password)
-        {         
-            // Create config object
-			config = new MobiControlApiConfig(FQDN, ClientId, ClientSecret, Username, Password);
+        //
+        // Alternative constructor overloads
+        //
+        public Api(string FQDN, string ClientId, string ClientSecret, string Username, string Password, CancellationToken ct) 
+            : this(new MobiControlApiConfig(FQDN, ClientId, ClientSecret, Username, Password), ct)
+        {}      
 
-			// Create Authentication object
-			authentication = new Authentication(config);
-           
-        }      
+		public Api(JObject jsonConfig, CancellationToken ct)
+            : this(MobiControlApiConfig.GetConfigFromJObject(jsonConfig), ct)
+        {}  
 
-		public Api(JObject jsonConfig)
-        {
-			// Create config object
-			config = MobiControlApiConfig.GetConfigFromJObject(jsonConfig);
+		public Api(string jsonConfig, CancellationToken ct)
+            :this(MobiControlApiConfig.GetConfigFromJsonString(jsonConfig), ct)
+        {}
 
-            // Create Authentication object
-            authentication = new Authentication(config);
-           
-        }  
 
-		public Api(string jsonConfig)
-        {
-            // Create config object
-			config = MobiControlApiConfig.GetConfigFromJsonString(jsonConfig);
-
-            // Create Authentication object
-            authentication = new Authentication(config);
-           
-        }
-
-		// This is the lowest level of the API - accepting raw resource path and retruning a json string
+        // This is the lowest level of the API - accepting raw resource path and retruning a json string
         #region low level SOTI REST Web API 
-		public async Task<string> GetJsonAsync(string resourcePath, CancellationToken cancellationToken)
-        {         
-			string token = await authentication.GetAuthenticationToken();
-			if (token == null)
-                return null;
 
-			httpClient.DefaultRequestHeaders.Clear();
-			httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                    
-            // Create http request 
-			var request = new HttpRequestMessage
-            {
-				Method = HttpMethod.Get,
-				RequestUri = new Uri(config.baseUri, resourcePath)
-            };            
-
-            // Send http request
-            HttpResponseMessage response = await httpClient.SendAsync(request, cancellationToken);
-            if (response.IsSuccessStatusCode)            
-				return await response.Content.ReadAsStringAsync();
-			else
-			    return null;
-        }
-
-        
-		public async Task<bool> PostJsonAsync(string resourcePath, string body)
+        // Get
+        public async Task<string> GetJsonAsync(string resourcePath)
         {
-            string token = await authentication.GetAuthenticationToken();
-            if (token == null)
-                return false;
 
-            httpClient.DefaultRequestHeaders.Clear();
-            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-
+            // Create http request 
             var request = new HttpRequestMessage
             {
-				Method = HttpMethod.Post,
-                RequestUri = new Uri(config.baseUri, resourcePath),
-				Content = new StringContent(body),
-                
-                
+                Method = HttpMethod.Get,
+                RequestUri = new Uri(config.baseUri, resourcePath)
             };
-			request.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json") { CharSet = "UTF-8" };
 
-            HttpResponseMessage response = await httpClient.SendAsync(request);
-			if (response.IsSuccessStatusCode)
-				return true;
+            // Send http request
+            HttpResponseMessage response = await SendSotiRequest(request);
+            if (response.IsSuccessStatusCode)
+                return await response.Content.ReadAsStringAsync();
             else
-                return false;
+                return null;
+
         }
 
-        public async Task<bool> PutJsonAsync(string resourcePath, string body)
+
+
+        // Post
+        public async Task<bool> PostJsonAsync(string resourcePath, string body)
         {
-            string token = await authentication.GetAuthenticationToken();
-            if (token == null)
+
+            // Create http request 
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(config.baseUri, resourcePath),
+                Content = new StringContent(body),
+
+
+            };
+            request.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json") { CharSet = "UTF-8" };
+
+
+            HttpResponseMessage response = await SendSotiRequest(request);
+            if (response.IsSuccessStatusCode)
+                return true;
+            else
                 return false;
 
-            httpClient.DefaultRequestHeaders.Clear();
-            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+        }
 
+        // Put
+        public async Task<bool> PutJsonAsync(string resourcePath, string body)
+        {
+            // Create http request 
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Put,
@@ -127,18 +124,49 @@ namespace MobiControlApi
             };
             request.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json") { CharSet = "UTF-8" };
 
-            HttpResponseMessage response = await httpClient.SendAsync(request);
+            HttpResponseMessage response = await SendSotiRequest(request);
             if (response.IsSuccessStatusCode)
                 return true;
             else
                 return false;
         }
 
+        // Send request to SOTI
+        private async Task<HttpResponseMessage> SendSotiRequest(HttpRequestMessage request)
+        {
+            /*
+            // Get a HTTP Client and make a request
+            var sotiClient = serviceProvider.GetRequiredService<SotiHttpClient>();
+            return await sotiClient.Get(request, cancellationToken);
+              */
+            // Get httpclient for SOTI mobicontrol
+            using (HttpClient httpClient = await GetSotiHttpClient(authentication))
+                return await httpClient.SendAsync(request, cancellationToken);
+
+        }
+
+        // Create new httpclient for SOTI mobicontrol
+        // TODO can we reuse the httpclient??  https://medium.com/@nuno.caneco/c-httpclient-should-not-be-disposed-or-should-it-45d2a8f568bc
+        //  Maybe use HttpClientFactory??  https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-2.2
+        private static async Task<HttpClient> GetSotiHttpClient(Authentication authentication)
+        {
+            string sotiToken = await authentication.GetAuthenticationToken();
+            if (sotiToken == null)
+                return null;
+
+            HttpClient httpClient = new HttpClient();
+            httpClient.Timeout = httpTimeout;
+            httpClient.DefaultRequestHeaders.Clear();
+            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + sotiToken);
+
+            return httpClient;
+        }
+
 
         #endregion
 
         // Get device list for specific group using /device MC 13+ API (reads directly from SOTI SQL DB)
-        private async Task<string> GetDeviceListJsonFromSotiDbAsync(string deviceGroupPath, int skip, int take, CancellationToken cancellationToken)
+        private async Task<string> GetDeviceListJsonFromSotiDbAsync(string deviceGroupPath, int skip, int take)
         {
 
 			deviceGroupPath = deviceGroupPath.Replace(" ", "%2520").Replace("/", "%255C");
@@ -151,13 +179,13 @@ namespace MobiControlApi
                 + "&take=" + take.ToString();
 
             // Call GetJsonAsync
-            return await GetJsonAsync(resourcePath, cancellationToken);
+            return await GetJsonAsync(resourcePath);
 
            
         }
 
         // Get device list for specific group using /device/search MC 14+ API (reads eleatic search DB)
-        private async Task<string> GetDeviceListJsonSearchDbAsync(string deviceGroupPath, string filter, bool includeSubgroups, bool verifyAndSync, int skip, int take, CancellationToken cancellationToken)
+        private async Task<string> GetDeviceListJsonSearchDbAsync(string deviceGroupPath, string filter, bool includeSubgroups, bool verifyAndSync, int skip, int take)
         {
 
             // Generate resourcePath
@@ -179,13 +207,13 @@ namespace MobiControlApi
 
 
             // Call GetJsonAsync
-            return await GetJsonAsync(resourcePath, cancellationToken);
+            return await GetJsonAsync(resourcePath);
 
         }
 
         public bool useSearchDbToGetDevices = false;
 
-        public async Task<List<string>> GetDeviceIdListAsync(string deviceGroupPath, bool includeSubgroups, CancellationToken cancellationToken)
+        public async Task<List<string>> GetDeviceIdListAsync(string deviceGroupPath, bool includeSubgroups)
         {
             List<string> listDeviceIds = new List<string>();
 
@@ -197,9 +225,9 @@ namespace MobiControlApi
             {
                 // Get devices in SOTI folder
                 if(useSearchDbToGetDevices)
-                    resultJson = await GetDeviceListJsonSearchDbAsync(deviceGroupPath, null, includeSubgroups, true, deviceOffset, deviceOffset + deviceBatchSize, cancellationToken);
+                    resultJson = await GetDeviceListJsonSearchDbAsync(deviceGroupPath, null, includeSubgroups, true, deviceOffset, deviceOffset + deviceBatchSize);
                 else
-                    resultJson = await GetDeviceListJsonFromSotiDbAsync(deviceGroupPath, deviceOffset, deviceOffset + deviceBatchSize, cancellationToken);
+                    resultJson = await GetDeviceListJsonFromSotiDbAsync(deviceGroupPath, deviceOffset, deviceOffset + deviceBatchSize);
 
                 // If we got a result - parse it
                 if (resultJson != null)
@@ -290,9 +318,9 @@ namespace MobiControlApi
                 // Get devices in SOTI folder
                 // Get devices in SOTI folder
                 if (useSearchDbToGetDevices)
-                    resultJson = await GetDeviceListJsonSearchDbAsync(deviceGroupPath, null, false, true, deviceOffset, deviceOffset + deviceBatchSize, cancellationToken);
+                    resultJson = await GetDeviceListJsonSearchDbAsync(deviceGroupPath, null, false, true, deviceOffset, deviceOffset + deviceBatchSize);
                 else
-                    resultJson = await GetDeviceListJsonFromSotiDbAsync(deviceGroupPath, deviceOffset, deviceOffset + deviceBatchSize, cancellationToken);
+                    resultJson = await GetDeviceListJsonFromSotiDbAsync(deviceGroupPath, deviceOffset, deviceOffset + deviceBatchSize);
 
 
                 // If we got a result - parse it
@@ -355,7 +383,7 @@ namespace MobiControlApi
             string resourcePath = "devices/" + deviceId + "/customAttributes";
 
             // Call GetJsonAsync
-            return await GetJsonAsync(resourcePath, cancellationToken);
+            return await GetJsonAsync(resourcePath);
         }
 
 

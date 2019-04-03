@@ -4,23 +4,25 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.DataContracts;
 
 namespace MobiControlApi
 
 {
     public class MonitorSotiFolder : MonitorSotiFolderEvents
     {
+        CancellationToken token;
+
         MonitorSotiFolderConfig monitorSotiGroupConfig;
         public string FolderPath => monitorSotiGroupConfig.FolderPath;
 
 
         // Known device Dictionary
-        public List<string> listKnownDeviceIds;
+        public List<string> listKnownDeviceIds { get; private set; }
 
 
-        List<string> listRemovedDeviceIds;
-        
-        
 
         /*
             "Group": 
@@ -30,8 +32,11 @@ namespace MobiControlApi
             }      
          */
 
-        public MonitorSotiFolder(string jsonConfig, List<string> listStartKnownDeviceIds)
+        public MonitorSotiFolder(string jsonConfig, List<string> listStartKnownDeviceIds, TelemetryClient tc, CancellationToken token)
         {
+            this.token = token;
+            this.tc = tc;
+
             // Import ćonfig from json
             monitorSotiGroupConfig = MonitorSotiFolderConfig.GetConfigFromJsonString(jsonConfig);
 
@@ -46,86 +51,105 @@ namespace MobiControlApi
 
         }   
 
-
-        public async Task<int> Start(Api mcApi, CancellationToken cancellationToken)
+        // Start monitoring of a folder at an interval
+        public async Task<int> Start(Api mcApi)
         {
-            do
+            System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
+            List<string> listAddedDevices;
+            List<string> listRemovedDevices;
+            List<string> listCurrentDevices = new List<string>();
+
+            Log("Scanning SOTI folder '" + monitorSotiGroupConfig.FolderPath + "' every " + monitorSotiGroupConfig.tsInterval.ToString(), SeverityLevel.Information);
+
+            // Start monitoring loop
+            while (!token.IsCancellationRequested)
             {
+
+
                 try
                 {
-                    List<string> listNewDeviceIds = new List<string>();
-                    List<string> listKnownDeviceIdsAtLastScan = listKnownDeviceIds;
-
-                    // reset temp dict and list
-                    listRemovedDeviceIds = listKnownDeviceIds;  // Set to all known - found devices will be removed leaving remove
+                    // Reset and start watch to time call to SOTI API
+                    stopWatch.Reset();
+                    stopWatch.Start();
 
                     // Get current devices in SOTI folder from server
-                    listKnownDeviceIds = await mcApi.GetDeviceIdListAsync(monitorSotiGroupConfig.FolderPath, false, cancellationToken);
+                    listCurrentDevices = await mcApi.GetDeviceIdListAsync(monitorSotiGroupConfig.FolderPath, false);
+
+                    // Stop
+                    stopWatch.Stop();
+
+                    DeviceListDiff(listCurrentDevices, listKnownDeviceIds, out listAddedDevices, out listRemovedDevices);
 
 
 
-                    // Itterate over device found
-                    foreach (string deviceId in listKnownDeviceIds)
-                    {
-
-                        // We need to find:
-                        // - Newly added devices
-                        // - Removed devices
-
-                        // Add all to new know devices
-
-                        // If device id is known
-                        if (listKnownDeviceIdsAtLastScan.Contains(deviceId))
+                    // If new devices was found
+                    if (listAddedDevices.Count > 0)
                         {
-                            // Device id is known and was found in latest folder scan (or initial given list)
-                            // -> Remove it for the removed list
-                            listRemovedDeviceIds.Remove(deviceId);
-                        }
-                        else
-                        {
-                            // Device is in unknown
-                            // Add to new devices dict
-                            listNewDeviceIds.Add(deviceId);
-
+                            OnNewDeviceList(this, listAddedDevices);
                         }
 
+                    // If devices were removed
+                    if (listRemovedDevices.Count > 0)
+                        OnRemovedDeviceList(this, listRemovedDevices);
 
+                    // Save list of know devices
+                    listKnownDeviceIds = listCurrentDevices;
 
-                        // If new devices was found
-                        if (listNewDeviceIds.Count > 0)
-                        {
-                            OnNewDeviceList(this, listNewDeviceIds);
-                        }
-
-                        // If devices were removed
-                        if (listRemovedDeviceIds.Count > 0)
-                            OnRemovedDeviceList(this, listRemovedDeviceIds);
-
-
-                    }
 
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    // log.Error("Exception", e);
+                    // Stop
+                    stopWatch.Stop();
+
+                    Log("Exception scanning SOTI folder '" + monitorSotiGroupConfig.FolderPath + "' in " + stopWatch.Elapsed.ToString(), SeverityLevel.Error);
+                    TrackException(ex);
+                }
+                finally
+                {
+                    // Stop
+                    stopWatch.Stop();
+
+
+                    var properties = new Dictionary<string, string>
+                             {
+                                 { "FolderPath", monitorSotiGroupConfig.FolderPath },
+                                 { "CurrentDeviceCount",listCurrentDevices.Count().ToString()}
+                             };
+
+                    TrackEvent("SotiScanFolder", stopWatch.Elapsed, properties);
                 }
 
-                if (!cancellationToken.IsCancellationRequested)
-                    await Task.Delay(monitorSotiGroupConfig.tsInterval, cancellationToken);
-                /*
-                else
-                    OnDoneWatching(this);
-                    */
+
+                // Wait before scanning again
+                if (!token.IsCancellationRequested)
+                    await Task.Delay(monitorSotiGroupConfig.tsInterval, token);
+
             }
-            while (!cancellationToken.IsCancellationRequested);
+
 
             return 0;
         }
 
 
+        // Diff 
+        /// 
+        public static void DeviceListDiff(List<string> listCurrentDevices, List<string> listLastCurrentDevices, out List<string> listAddedDevices, out List<string> listRemovedDevices)
+        {
+            // Input: listCurrentDevices + listLastCurrentDevices
+            // Output: listAddedDevices + listRemovedDevices
+
+            // Those devices that have been added since last time
+            listAddedDevices = listCurrentDevices.Except(listLastCurrentDevices).ToList();
+            // Those devices that have been removed since last time
+            listRemovedDevices = listLastCurrentDevices.Except(listCurrentDevices).ToList();
+
+        }
+
+
         public async Task<List<string>> GetDeviceIdListAsync(Api mcApi, CancellationToken cancellationToken)
         {
-            return await mcApi.GetDeviceIdListAsync(monitorSotiGroupConfig.FolderPath, false, cancellationToken); 
+            return await mcApi.GetDeviceIdListAsync(monitorSotiGroupConfig.FolderPath, false); 
         }
 
         public async Task<List<Device>> GetDeviceListAsync(Api mcApi, CancellationToken cancellationToken)
