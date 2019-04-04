@@ -61,12 +61,16 @@ namespace MobiControlApi
         {
             try
             {
-                if (mcApi == null)
-                    // Validate connnection to the MC server
-                    mcApi = new Api(MobiControlApiConfigJson, token);
-
                 // list of monitoring tasks
                 listTask = new List<Task>();
+
+                if (mcApi == null)
+                {
+                    // Validate connnection to the MC server
+                    mcApi = new Api(MobiControlApiConfigJson, tc, token);
+
+                }
+
                 
                 // Create task list for each SOTI folder to be monitored
                 foreach (var group in listMonitorSotiFolder)
@@ -81,7 +85,7 @@ namespace MobiControlApi
             }
             catch (Exception ex)
             {
-                Log("Exception starting MobiControl folders monitor", SeverityLevel.Error);
+                Log("Exception starting MobiControl group monitor", SeverityLevel.Error);
                 TrackException(ex);
             }
         }
@@ -95,7 +99,7 @@ namespace MobiControlApi
             {
                 if (mcApi == null)
                     // Validate connnection to the MC server
-                    mcApi = new Api(MobiControlApiConfigJson, token);
+                    mcApi = new Api(MobiControlApiConfigJson, tc, token);
 
                 // Itterate over monitored groups and return device list
                 foreach (var group in listMonitorSotiFolder)
@@ -113,6 +117,8 @@ namespace MobiControlApi
             return listDeviceIds;
         }
 
+
+
         // Get device list for all monitored folders
         public async Task<List<Device>> GetDeviceListAsync()
         {
@@ -122,7 +128,7 @@ namespace MobiControlApi
             {
                 if (mcApi == null)
                     // Validate connnection to the MC server
-                    mcApi = new Api(MobiControlApiConfigJson, token);
+                    mcApi = new Api(MobiControlApiConfigJson, tc, token);
 
                 // Itterate over monitored groups and return device dict
                 foreach (var group in listMonitorSotiFolder)

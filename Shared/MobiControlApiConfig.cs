@@ -1,6 +1,8 @@
 ﻿using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Xml;
+
 
 namespace MobiControlApi
 {
@@ -18,30 +20,45 @@ namespace MobiControlApi
 
 		public Uri baseUri => new Uri("https://" + FQDN + "/MobiControl/api/");
 
-		public MobiControlApiConfig(string fQDN, string clientId, string clientSecret, string username, string password)
+        // Cache
+        public bool CacheDevices = false;
+        public string CacheUpdateInterval;
+        public string MaxSotiResponseTime;
+        public string MaxCacheAge;
+
+        public TimeSpan tsCacheUpdateInterval => XmlConvert.ToTimeSpan(CacheUpdateInterval);
+        public TimeSpan tsMaxSotiResponseTime => XmlConvert.ToTimeSpan(MaxSotiResponseTime);
+        public TimeSpan tsMaxCacheAge => XmlConvert.ToTimeSpan(MaxCacheAge);
+
+        public MobiControlApiConfig(string fQDN, string clientId, string clientSecret, string username, string password)
 		{
 			FQDN = fQDN;
 			ClientId = clientId;
 			ClientSecret = clientSecret;
 			Username = username;
 			Password = password;
-		}
+
+        }
 
 
-		/*
+        /*
 
         {
             "FQDN": "server.domain.tld",
             "ClientId": "",
             "ClientSecret": "",
             "Username": "",
-            "Password":""
+            "Password":"",
+            "CacheDevices": true,
+            "CacheUpdateInterval": "PT60S",
+            "MaxSotiResponseTime": "PT10S",
+            "MaxCacheAge": "PT120S"           
 
         }
 
         */
 
-		public static MobiControlApiConfig GetConfigFromJObject(JObject jsonConfig)
+        public static MobiControlApiConfig GetConfigFromJObject(JObject jsonConfig)
 		{
 			return jsonConfig.ToObject<MobiControlApiConfig>();
 		}

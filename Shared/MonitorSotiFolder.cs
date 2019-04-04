@@ -64,8 +64,6 @@ namespace MobiControlApi
             // Start monitoring loop
             while (!token.IsCancellationRequested)
             {
-
-
                 try
                 {
                     // Reset and start watch to time call to SOTI API
@@ -95,6 +93,18 @@ namespace MobiControlApi
                     // Save list of know devices
                     listKnownDeviceIds = listCurrentDevices;
 
+                    // Stop
+                    stopWatch.Stop();
+
+
+                    var properties = new Dictionary<string, string>
+                             {
+                                 { "GroupPath", monitorSotiGroupConfig.FolderPath },
+                                 { "CurrentDeviceCount",listCurrentDevices.Count().ToString()},
+                                 { "UsingDeviceCache",mcApi.CacheDevices.ToString()}
+                             };
+
+                    TrackEvent("SotiMonitorScanGroup", stopWatch.Elapsed, properties);
 
                 }
                 catch (Exception ex)
@@ -102,22 +112,8 @@ namespace MobiControlApi
                     // Stop
                     stopWatch.Stop();
 
-                    Log("Exception scanning SOTI folder '" + monitorSotiGroupConfig.FolderPath + "' in " + stopWatch.Elapsed.ToString(), SeverityLevel.Error);
+                    Log("Exception scanning SOTI groupe '" + monitorSotiGroupConfig.FolderPath + "' in " + stopWatch.Elapsed.ToString(), SeverityLevel.Error);
                     TrackException(ex);
-                }
-                finally
-                {
-                    // Stop
-                    stopWatch.Stop();
-
-
-                    var properties = new Dictionary<string, string>
-                             {
-                                 { "FolderPath", monitorSotiGroupConfig.FolderPath },
-                                 { "CurrentDeviceCount",listCurrentDevices.Count().ToString()}
-                             };
-
-                    TrackEvent("SotiScanFolder", stopWatch.Elapsed, properties);
                 }
 
 
@@ -154,7 +150,7 @@ namespace MobiControlApi
 
         public async Task<List<Device>> GetDeviceListAsync(Api mcApi)
         {
-            return await mcApi.GetDeviceListAsync(monitorSotiGroupConfig.FolderPath);
+            return await mcApi.GetDeviceListAsync(monitorSotiGroupConfig.FolderPath, false);
         }
     }
 }
