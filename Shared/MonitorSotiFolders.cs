@@ -101,7 +101,7 @@ namespace MobiControlApi
                 foreach (var group in listMonitorSotiFolder)
                 {
 
-                    listDeviceIds.AddRange(await group.GetDeviceIdListAsync(mcApi, token));
+                    listDeviceIds.AddRange(await group.GetDeviceIdListAsync(mcApi));
 
                 }
             }
@@ -127,7 +127,7 @@ namespace MobiControlApi
                 // Itterate over monitored groups and return device dict
                 foreach (var group in listMonitorSotiFolder)
                 {
-                    listDevices.AddRange(await group.GetDeviceListAsync(mcApi, token));
+                    listDevices.AddRange(await group.GetDeviceListAsync(mcApi));
                 }
             }
             catch (Exception ex)

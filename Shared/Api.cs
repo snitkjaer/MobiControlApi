@@ -11,9 +11,8 @@ namespace MobiControlApi
 {
     public class Api
     {
-        CancellationToken cancellationToken;
-
-        MobiControlApiConfig config;
+        private readonly CancellationToken cancellationToken;
+        private readonly MobiControlApiConfig config;
 
         /*
         private readonly IHttpClientFactory httpClientFactory;
@@ -305,7 +304,11 @@ namespace MobiControlApi
         }
         */
 
-        public async Task<List<Device>> GetDeviceListAsync(string deviceGroupPath, CancellationToken cancellationToken)
+
+
+
+
+        public async Task<List<Device>> GetDeviceListAsync(string deviceGroupPath)
         {
             List<Device> listDevices = new List<Device>();
 
@@ -313,9 +316,9 @@ namespace MobiControlApi
             int deviceBatchSize = 50;
             string resultJson = null;
 
+            // SOTI API only returns a batch of 50 devices - continue to itterate over device batches
             while (true)
             {
-                // Get devices in SOTI folder
                 // Get devices in SOTI folder
                 if (useSearchDbToGetDevices)
                     resultJson = await GetDeviceListJsonSearchDbAsync(deviceGroupPath, null, false, true, deviceOffset, deviceOffset + deviceBatchSize);
@@ -332,7 +335,7 @@ namespace MobiControlApi
                     // Itterate over device found
                     foreach (JObject deviceJson in devices)
                     {
-                        // deviceId
+                        // parse device
                         Device device = Device.FromJson(deviceJson.ToString());
 
                         if (device != null)

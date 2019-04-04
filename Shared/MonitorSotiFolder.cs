@@ -147,14 +147,14 @@ namespace MobiControlApi
         }
 
 
-        public async Task<List<string>> GetDeviceIdListAsync(Api mcApi, CancellationToken cancellationToken)
+        public async Task<List<string>> GetDeviceIdListAsync(Api mcApi)
         {
             return await mcApi.GetDeviceIdListAsync(monitorSotiGroupConfig.FolderPath, false); 
         }
 
-        public async Task<List<Device>> GetDeviceListAsync(Api mcApi, CancellationToken cancellationToken)
+        public async Task<List<Device>> GetDeviceListAsync(Api mcApi)
         {
-            return await mcApi.GetDeviceListAsync(monitorSotiGroupConfig.FolderPath, cancellationToken);
+            return await mcApi.GetDeviceListAsync(monitorSotiGroupConfig.FolderPath);
         }
     }
 }
