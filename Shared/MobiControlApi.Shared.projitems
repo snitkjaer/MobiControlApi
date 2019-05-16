@@ -18,7 +18,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)MonitorSotiFolder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonitorSotiFolderConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimeSpanConverter.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SotiHttpClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)API_Cache.cs" />
   </ItemGroup>
 </Project>
