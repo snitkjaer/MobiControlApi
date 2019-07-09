@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace MobiControlApi
 {
-    public class MonitorSotiFolderEvents: Common.Shared.LogAbstraction
+    public class MonitorSotiFolderEvents: LogAbstraction
     {
         #region NewDeviceList Event
         // Delegate

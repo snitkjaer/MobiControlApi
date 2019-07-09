@@ -13,8 +13,6 @@
     <LangVersion>Latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-    <PackageReference Include="Refit" Version="4.6.99" />
+    <ProjectReference Include="..\MobiControlApi.Lib\MobiControlApi.Lib.csproj" />
   </ItemGroup>
-  <Import Project="..\Shared\MobiControlApi.Shared.projitems" Label="Shared" Condition="Exists('..\Shared\MobiControlApi.Shared.projitems')" />
 </Project>

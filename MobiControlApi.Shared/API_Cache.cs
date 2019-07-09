@@ -10,7 +10,7 @@ using Microsoft.ApplicationInsights.DataContracts;
 
 namespace MobiControlApi
 {
-    public partial class Api: Common.Shared.LogAbstraction
+    public partial class Api: LogAbstraction
     {
         // I many different folders are individually monitored it can create a lot of calls to SOTI API
         // To minimize this a device cache can be enabled, which will only be update when used and it out of date

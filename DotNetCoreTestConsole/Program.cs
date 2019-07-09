@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using MobiControlApi;
 
-
 namespace DotNetCoreTestConsole
 {
     class Program
@@ -26,12 +25,18 @@ namespace DotNetCoreTestConsole
             // Create in the SOTI MobiControl user management - must be admin
             string Username = "";
             string Password = "";
-                     
-			try
+
+
+            var version = typeof(Program).Assembly.GetName().Version.ToString().Trim(new Char[] { '{', '}' });
+            Console.WriteLine("Starting version " + version);
+
+
+            try
 			{
-				Api mcApi = new Api(FQDN, ClientId, ClientSecret, Username, Password);
+
+				Api mcApi = new Api(FQDN, ClientId, ClientSecret, Username, Password, cts.Token);
                 // Get device groups json
-				string resultJson = await mcApi.GetJsonAsync("devicegroups",cts.Token);
+				string resultJson = await mcApi.GetJsonAsync("devicegroups");
 				Console.Write(resultJson);
 
 			}

@@ -12,7 +12,7 @@ using Microsoft.ApplicationInsights.DataContracts;
 
 namespace MobiControlApi
 {
-    public partial class Api: Common.Shared.LogAbstraction
+    public partial class Api: LogAbstraction
     {
         private readonly CancellationToken cancellationToken;
         private readonly MobiControlApiConfig config;
@@ -64,9 +64,13 @@ namespace MobiControlApi
         //
         public Api(string FQDN, string ClientId, string ClientSecret, string Username, string Password, TelemetryClient tc, CancellationToken ct) 
             : this(new MobiControlApiConfig(FQDN, ClientId, ClientSecret, Username, Password), tc, ct)
-        {}      
+        {}
 
-		public Api(JObject jsonConfig, TelemetryClient tc, CancellationToken ct)
+        public Api(string FQDN, string ClientId, string ClientSecret, string Username, string Password, CancellationToken ct)
+            : this(new MobiControlApiConfig(FQDN, ClientId, ClientSecret, Username, Password), null, ct)
+        { }
+
+        public Api(JObject jsonConfig, TelemetryClient tc, CancellationToken ct)
             : this(MobiControlApiConfig.GetConfigFromJObject(jsonConfig), tc, ct)
         {}  
 

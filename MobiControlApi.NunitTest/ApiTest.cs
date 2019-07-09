@@ -26,10 +26,10 @@ namespace MobiControlApi.NunitTest
 
             #region Execute code
             // SOTI Server API
-            Api mcApi = new Api(mobiControlApiConfig);
+            Api mcApi = new Api(mobiControlApiConfig, null, token);
 
             // Get list of devices
-            List<Device> devices = await mcApi.GetDeviceListAsync("/Zebra TC56/Drift", token);
+            List<Device> devices = await mcApi.GetDeviceListAsync("/Zebra TC56/Drift", false);
 
             #endregion
 
@@ -55,11 +55,11 @@ namespace MobiControlApi.NunitTest
 
             #region Execute code
             // SOTI Server API
-            Api mcApi = new Api(mobiControlApiConfig);
+            Api mcApi = new Api(mobiControlApiConfig, null, token);
             mcApi.useSearchDbToGetDevices = true;
 
             // Get list of devices
-            List<Device> devices = await mcApi.GetDeviceListAsync("/Zebra TC56/Drift", token);
+            List<Device> devices = await mcApi.GetDeviceListAsync("/Zebra TC56/Drift", false);
 
             #endregion
 
