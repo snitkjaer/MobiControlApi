@@ -29,7 +29,7 @@ namespace MobiControlApi
         private static TimeSpan httpTimeout = new TimeSpan(0, 0, 20);  // 20 sec
 
         // SOTI API can accecss device from either the search DB og the traditional DB
-        public bool useSearchDbToGetDevices = false;
+        public bool useSearchDbToGetDevices = true;
 
         // 
 
