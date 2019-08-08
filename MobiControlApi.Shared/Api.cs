@@ -181,9 +181,23 @@ namespace MobiControlApi
             var sotiClient = serviceProvider.GetRequiredService<SotiHttpClient>();
             return await sotiClient.Get(request, cancellationToken);
               */
+
+            HttpResponseMessage response;
+
             // Get httpclient for SOTI mobicontrol
             using (HttpClient httpClient = await GetSotiHttpClient(authentication))
-                return await httpClient.SendAsync(request, cancellationToken);
+            {
+                response = await httpClient.SendAsync(request, cancellationToken);
+            }
+
+            // If error log it
+            if (!response.IsSuccessStatusCode)
+            {
+                Log("Http request error with status code " + response.StatusCode + " with reason" +
+                    " " + response.ReasonPhrase, SeverityLevel.Error);
+            }
+
+            return response;
 
         }
 

@@ -11,7 +11,9 @@ namespace MobiControlApi.NunitTest
     [TestFixture()]
     public class Api_Test
     {
-   
+
+        static int expectedNoOfDeviceOnTestServer = 150;
+
 
         [Test()]
         // using /devices
@@ -36,7 +38,7 @@ namespace MobiControlApi.NunitTest
 
             #region Make assertion(s) on the result
             // This value must match the number of devices in at given group on the server
-            Assert.AreEqual(112, devices.Count);
+            Assert.AreEqual(expectedNoOfDeviceOnTestServer, devices.Count);
 
             #endregion
 
@@ -66,7 +68,7 @@ namespace MobiControlApi.NunitTest
 
             #region Make assertion(s) on the result
             // This value must match the number of devices in at given group on the server
-            Assert.AreEqual(112, devices.Count);
+            Assert.AreEqual(expectedNoOfDeviceOnTestServer, devices.Count);
 
             #endregion
 
