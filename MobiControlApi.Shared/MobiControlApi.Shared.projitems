@@ -20,5 +20,15 @@
     <Compile Include="$(MSBuildThisFileDirectory)TimeSpanConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)API_Cache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LogAbstraction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)API_CustomAttributes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)API_Action.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)MobiControlServerApiConfig.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)MobiControlServerApiConfig_Template.json" />
   </ItemGroup>
 </Project>

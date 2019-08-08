@@ -15,20 +15,25 @@ namespace MobiControlApi.NunitTest
         static int expectedNoOfDeviceOnTestServer = 150;
 
 
+        static CancellationToken token;
+
+        static MobiControlApiConfig mobiControlApiConfig = MobiControlApiConfig.GetConfigFromJsonFile("MobiControlServerApiConfig.json");
+
+        // SOTI Server API
+        Api mcApi = new Api(mobiControlApiConfig, null, token);
+
+
+
         [Test()]
-        // using /devices
+        // using /devices (the version 13+ methode)
         public async Task DeviceCountSqlDb()
         {
             #region Setup conditions
-            CancellationToken token;
-
-            MobiControlApiConfig mobiControlApiConfig = MobiControlApiConfig.GetConfigFromJsonFile("MobiControlServerApiConfig.json");
             #endregion
 
 
             #region Execute code
-            // SOTI Server API
-            Api mcApi = new Api(mobiControlApiConfig, null, token);
+            mcApi.useSearchDbToGetDevices = false;
 
             // Get list of devices
             List<Device> devices = await mcApi.GetDeviceListAsync("/Zebra TC56/Drift", false);
@@ -44,20 +49,15 @@ namespace MobiControlApi.NunitTest
 
         }
 
-        // using /devices/search
+        // using /devices/search (the version 14+ methode)
         [Test()]
         public async Task DeviceCountSearchDb()
         {
             #region Setup conditions
-            CancellationToken token;
-
-            MobiControlApiConfig mobiControlApiConfig = MobiControlApiConfig.GetConfigFromJsonFile("MobiControlServerApiConfig.json");
             #endregion
 
 
             #region Execute code
-            // SOTI Server API
-            Api mcApi = new Api(mobiControlApiConfig, null, token);
             mcApi.useSearchDbToGetDevices = true;
 
             // Get list of devices
@@ -75,6 +75,40 @@ namespace MobiControlApi.NunitTest
         }
 
 
+        // set
+        [Test()]
+        public async Task SetGetDeviceCustomAttibute()
+        {
+            #region Setup conditions
+            string deviceId = "353857081083640";
+            string CustomAttributeName = "RkCertStatus";
+            string NewValue = "test" + DateTime.Now.ToFileTime();
+            #endregion
+
+
+            #region Execute code
+            // Get attrubute
+            string beforeValue = await mcApi.GetCustomAttributeValueAsync(deviceId, CustomAttributeName);
+            
+
+            // Set attribute
+            bool setResult = await mcApi.SetCustomAttributeAsync(deviceId, CustomAttributeName, NewValue);
+
+            // Get attrubute
+            string afterValue = await mcApi.GetCustomAttributeValueAsync(deviceId, CustomAttributeName);
+
+
+
+            #endregion
+
+
+            #region Make assertion(s) on the result
+            // This value must match the number of devices in at given group on the server
+            Assert.AreEqual(NewValue, afterValue);
+
+            #endregion
+
+        }
 
 
 

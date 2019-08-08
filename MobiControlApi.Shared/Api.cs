@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ApplicationInsights;
@@ -12,7 +13,7 @@ using Microsoft.ApplicationInsights.DataContracts;
 
 namespace MobiControlApi
 {
-    public partial class Api: LogAbstraction
+    public partial class Api : LogAbstraction
     {
         private readonly CancellationToken cancellationToken;
         private readonly MobiControlApiConfig config;
@@ -38,8 +39,6 @@ namespace MobiControlApi
         {
             this.tc = tc;
 
-        
-
             // Create config object
             config = mobiControlApiConfig;
 
@@ -62,9 +61,9 @@ namespace MobiControlApi
         //
         // Alternative constructor overloads
         //
-        public Api(string FQDN, string ClientId, string ClientSecret, string Username, string Password, TelemetryClient tc, CancellationToken ct) 
+        public Api(string FQDN, string ClientId, string ClientSecret, string Username, string Password, TelemetryClient tc, CancellationToken ct)
             : this(new MobiControlApiConfig(FQDN, ClientId, ClientSecret, Username, Password), tc, ct)
-        {}
+        { }
 
         public Api(string FQDN, string ClientId, string ClientSecret, string Username, string Password, CancellationToken ct)
             : this(new MobiControlApiConfig(FQDN, ClientId, ClientSecret, Username, Password), null, ct)
@@ -72,11 +71,11 @@ namespace MobiControlApi
 
         public Api(JObject jsonConfig, TelemetryClient tc, CancellationToken ct)
             : this(MobiControlApiConfig.GetConfigFromJObject(jsonConfig), tc, ct)
-        {}  
+        { }
 
-		public Api(string jsonConfig, TelemetryClient tc, CancellationToken ct)
-            :this(MobiControlApiConfig.GetConfigFromJsonString(jsonConfig),tc, ct)
-        {}
+        public Api(string jsonConfig, TelemetryClient tc, CancellationToken ct)
+            : this(MobiControlApiConfig.GetConfigFromJsonString(jsonConfig), tc, ct)
+        { }
 
         List<Task> listTask = new List<Task>();
 
@@ -87,7 +86,7 @@ namespace MobiControlApi
                 // TODO add SOTI API state monitor
 
                 // Cache
-                if(CacheDevices)
+                if (CacheDevices)
                     listTask.Add(UpdateCachedDeviceListOnInterval());
 
                 Log("Started SOTI API monitor", SeverityLevel.Information);
@@ -219,7 +218,7 @@ namespace MobiControlApi
         }
 
 
-       
+
 
         // Get device list for specific group using /device MC 13+ API (reads directly from SOTI SQL DB)
         private async Task<string> GetDeviceListJsonFromSotiDbAsync(string deviceGroupPath, int skip, int take)
@@ -287,7 +286,7 @@ namespace MobiControlApi
             while (true)
             {
                 // Get devices in SOTI folder
-                if(useSearchDbToGetDevices)
+                if (useSearchDbToGetDevices)
                     resultJson = await GetDeviceListJsonSearchDbAsync(deviceGroupPath, null, includeSubgroups, true, deviceOffset, deviceOffset + deviceBatchSize);
                 else
                     resultJson = await GetDeviceListJsonFromSotiDbAsync(deviceGroupPath, deviceOffset, deviceOffset + deviceBatchSize);
@@ -416,100 +415,5 @@ namespace MobiControlApi
 
 
 
-        public async Task<bool> SendActionToDevicesAsync(string deviceId,string Action, string Message)
-        {
-			// POST /devices/actions/DeviceIds
-
-			List<string> deviceIds = new List<string>();
-			deviceIds.Add(deviceId);
-            
-			ActionBody actionBody = new ActionBody(deviceIds, new ActionInfo(Action, Message));
-
-            // Generate resourcePath
-			string resourcePath = "devices/actions";
-			string actionBodyJson = actionBody.ToJsonString();
-            // Call GetJsonAsync
-			return await PostJsonAsync(resourcePath, actionBodyJson);
-        }
-
-        public async Task<string> GetCustomAttributesAsync(string deviceId, CancellationToken cancellationToken)
-        {
-            // GET /devices/{deviceId}/customAttributes
-
-            List<string> deviceIds = new List<string>();
-            deviceIds.Add(deviceId);
-
-            // Generate resourcePath
-            string resourcePath = "devices/" + deviceId + "/customAttributes";
-
-            // Call GetJsonAsync
-            return await GetJsonAsync(resourcePath);
-        }
-
-
-        public async Task<bool> SetCustomAttributeAsync(string deviceId, string customAttributeId, string customAttributeValue)
-        {
-            // PUT /devices/{deviceId}/customAttributes/{customAttributeId}
-
-            List<string> deviceIds = new List<string>();
-            deviceIds.Add(deviceId);
-
-            // Generate resourcePath
-            string resourcePath = "devices/" + deviceId + "/customAttributes/" + customAttributeId;
-            string CustomAttributeBodyJson = new CustomAttributeBody(customAttributeValue).ToJsonString();
-            // Call GetJsonAsync
-            return await PutJsonAsync(resourcePath, CustomAttributeBodyJson);
-        }
-
-
-
-
     }
-
-
-    public class CustomAttributeBody
-    {
-        public string customAttributeValue;
-
-        public CustomAttributeBody(string customAttributeValue)
-        {
-            this.customAttributeValue = customAttributeValue;
-        }
-
-        public string ToJsonString()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
-        }
-    }
-
-
-    public class ActionBody
-    {
-		public List<string> DeviceIds;
-		public ActionInfo ActionInfo;
-
-		public ActionBody(List<string> deviceIds, ActionInfo actionInfo)
-		{
-			DeviceIds = deviceIds;
-			ActionInfo = actionInfo;
-		}
-
-		public string ToJsonString()
-		{
-			return Newtonsoft.Json.JsonConvert.SerializeObject(this);
-		}
-
-	}
-   
-	public class ActionInfo
-    {
-		public string Action;
-		public string Message;
-
-		public ActionInfo(string action, string message)
-		{
-			Action = action;
-			Message = message;
-		}
-	}
 }

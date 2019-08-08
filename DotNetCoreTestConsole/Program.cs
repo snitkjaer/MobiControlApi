@@ -13,18 +13,8 @@ namespace DotNetCoreTestConsole
             CancellationTokenSource cts = new CancellationTokenSource();
 
             //
-            // You need to change these values to match your environment
+            // You need to change MobiControlServerApiConfig.json values to match your environment
             //
-
-            // The is fully qualified domain name for the server
-            string FQDN = "server.domain.tld";
-
-			// Needs to be generated on SOTI MobiControl server using MCadmin.exe
-            string ClientId = "";
-            string ClientSecret = "";
-            // Create in the SOTI MobiControl user management - must be admin
-            string Username = "";
-            string Password = "";
 
 
             var version = typeof(Program).Assembly.GetName().Version.ToString().Trim(new Char[] { '{', '}' });
@@ -33,10 +23,13 @@ namespace DotNetCoreTestConsole
 
             try
 			{
+                MobiControlApiConfig mobiControlApiConfig = MobiControlApiConfig.GetConfigFromJsonFile("MobiControlServerApiConfig.json");
 
-				Api mcApi = new Api(FQDN, ClientId, ClientSecret, Username, Password, cts.Token);
+                // SOTI Server API
+                Api mcApi = new Api(mobiControlApiConfig, null, cts.Token);
+
                 // Get device groups json
-				string resultJson = await mcApi.GetJsonAsync("devicegroups");
+                string resultJson = await mcApi.GetJsonAsync("devicegroups");
 				Console.Write(resultJson);
 
 			}

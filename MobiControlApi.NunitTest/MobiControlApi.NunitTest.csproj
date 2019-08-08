@@ -286,11 +286,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="MobiControlServerApiConfig.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\MobiControlApi.Lib\MobiControlApi.Lib.csproj">
       <Project>{06A31EB1-8721-4BFB-A352-E7FE338AE02C}</Project>
       <Name>MobiControlApi.Lib</Name>
