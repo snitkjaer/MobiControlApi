@@ -138,6 +138,30 @@ namespace MobiControlApi.NunitTest
         }
 
 
+        // Test action
+        [Test()]
+        public async Task UploadPackage()
+        {
+            #region Setup conditions
+            string filePath = AppDomain.CurrentDomain.BaseDirectory + "/TestPackage.pcg";
+            #endregion
+
+
+            #region Execute code
+
+            // Set attribute
+            bool result = await mcApi.UploadPackageAsync(filePath);
+
+            #endregion
+
+
+            #region Make assertion(s) on the result
+            // This value must match the number of devices in at given group on the server
+            Assert.AreEqual(true, result);
+
+            #endregion
+
+        }
 
 
 

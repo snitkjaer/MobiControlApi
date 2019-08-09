@@ -151,8 +151,15 @@ namespace MobiControlApi
 
         }
 
-        // Put
+        // Put json
         public async Task<bool> PutJsonAsync(string resourcePath, string body)
+        {
+            return await PutAsync(resourcePath, body, "application/json");
+
+        }
+
+        // Put
+        public async Task<bool> PutAsync(string resourcePath, string body, string ContentType)
         {
             // Create http request 
             var request = new HttpRequestMessage
@@ -163,7 +170,28 @@ namespace MobiControlApi
 
 
             };
-            request.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json") { CharSet = "UTF-8" };
+            request.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue(ContentType) { CharSet = "UTF-8" };
+
+            HttpResponseMessage response = await SendSotiRequest(request);
+            if (response.IsSuccessStatusCode)
+                return true;
+            else
+                return false;
+        }
+
+        // Put
+        public async Task<bool> PostAsync(string resourcePath, string body, string ContentType)
+        {
+            // Create http request 
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(config.baseUri, resourcePath),
+                Content = new StringContent(body),
+
+
+            };
+            request.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue(ContentType) { CharSet = "UTF-8" };
 
             HttpResponseMessage response = await SendSotiRequest(request);
             if (response.IsSuccessStatusCode)
