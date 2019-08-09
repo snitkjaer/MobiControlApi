@@ -12,54 +12,34 @@ namespace MobiControlApi
 {
     public partial class Api : LogAbstraction
     {
-        public async Task<bool> SendActionToDevicesAsync(string deviceId, string Action, string Message)
+        public enum ActionInfo { CheckIn, Wipe, Lock, Unenroll, SendMessage, Locate, SendScript, Delete, Disable, Enable, Rename, SetPasscode, AppleSoftwareUpdateScan, AppleSoftwareUpdateSchedule, AppleSoftwareUpdateRefreshStatus, SetDeviceName, ResetPasscode, AllowSotiSurf, BlockSotiSurf, ClearRestrictions, BypassActivationLock, SoftReset, RemoteRing, TurnOffSuspend, StartTracking, StopTracking, ClearSotiSurfCache, BlockSotiHub, AllowSotiHub, ClearSotiHubCache, DisablePasscodeLock, ScanForViruses, UpdateVirusDefinitions, SendTestPage, FactoryReset, EnableWorkProfile, DisableWorkProfile, SendSmsMessage, SetWallpaper, ResetUserBinding, EnableLostMode, DisableLostMode, BlockExchangeAccess, AllowExchangeAccess, EnableAgentUpgrade, DisableAgentUpgrade, MigrateToELMAgent, UpgradeAgentNow, SyncFilesNow, SendScriptViaSms, EnrollInEFOTA, LinuxSoftwareUpdateSchedule, UpgradeFirmware, UpdateManagementProfile, SendScriptViaPns, ResetContainerPasscode, UpgradeAgent, UpdateLicense, PlaySound, LinuxSoftwareUpdateScan, SetFirmwarePassword, UnlockUserAccount, MigrateToAndroidEnterprise };
+
+
+
+        public async Task<bool> SendActionToDevicesAsync(string deviceId, ActionInfo Action)
         {
-            // POST /devices/actions/DeviceIds
+            // POST /devices/{deviceId}/actions
 
-            List<string> deviceIds = new List<string>();
-            deviceIds.Add(deviceId);
+            /*
+                {
+                  "Action": "CheckIn"
+                }
+             */
+            JObject objBody = new JObject(
+                new JProperty("Action", Action.ToString())
+            );
 
-            ActionBody actionBody = new ActionBody(deviceIds, new ActionInfo(Action, Message));
+
 
             // Generate resourcePath
-            string resourcePath = "devices/actions";
-            string actionBodyJson = actionBody.ToJsonString();
+            //      /devices/{deviceId}/actions
+            string resourcePath = "devices/" + deviceId + "/actions";
+
             // Call GetJsonAsync
-            return await PostJsonAsync(resourcePath, actionBodyJson);
-        }
-
-
-
-    }
-
-    public class ActionBody
-    {
-        public List<string> DeviceIds;
-        public ActionInfo ActionInfo;
-
-        public ActionBody(List<string> deviceIds, ActionInfo actionInfo)
-        {
-            DeviceIds = deviceIds;
-            ActionInfo = actionInfo;
-        }
-
-        public string ToJsonString()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+            return await PostJsonAsync(resourcePath, objBody.ToString());
         }
 
     }
 
-    public class ActionInfo
-    {
-        public string Action;
-        public string Message;
-
-        public ActionInfo(string action, string message)
-        {
-            Action = action;
-            Message = message;
-        }
-    }
 }
 

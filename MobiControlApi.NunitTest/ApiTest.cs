@@ -75,9 +75,9 @@ namespace MobiControlApi.NunitTest
         }
 
 
-        // set
+        // Get / set device custom attribute
         [Test()]
-        public async Task SetGetDeviceCustomAttibute()
+        public async Task GetSetDeviceCustomAttibute()
         {
             #region Setup conditions
             string deviceId = "353857081083640";
@@ -112,7 +112,30 @@ namespace MobiControlApi.NunitTest
 
 
 
+        // Test action
+        [Test()]
+        public async Task SetGetDeviceCustomAttibute()
+        {
+            #region Setup conditions
+            string deviceId = "353857081083640";
+            #endregion
 
+
+            #region Execute code
+
+            // Set attribute
+            bool result = await mcApi.SendActionToDevicesAsync(deviceId, Api.ActionInfo.CheckIn);
+
+            #endregion
+
+
+            #region Make assertion(s) on the result
+            // This value must match the number of devices in at given group on the server
+            Assert.AreEqual(true, result);
+
+            #endregion
+
+        }
 
 
 
