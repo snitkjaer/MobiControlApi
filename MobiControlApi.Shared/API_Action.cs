@@ -38,17 +38,6 @@ namespace MobiControlApi
         {
             // POST /devices/{deviceId}/actions
 
-            /*
-                {
-                  "Action": "CheckIn"
-                }
-            
-            JObject objBody = new JObject(
-                new JProperty("Action", Action.ToString())
-            );
-
-     */
-
             // Generate resourcePath
             //      /devices/{deviceId}/actions
             string resourcePath = "devices/" + deviceId + "/actions";
@@ -62,9 +51,19 @@ namespace MobiControlApi
             return await PostJsonAsync(resourcePath, body);
         }
 
+
+        // Install PKCS #12 client certificate bundle (i.e.  typically a private key + the X.509 certificate and chain of trust) on a device (typically a .pfx)
+        public async Task<bool> InstallCertificateOnDevice(string deviceId, string p12FilePath, string certificatePassword)
+        {
+            string installCertCommand = "certimport -cert \"" + p12FilePath + "\" -ctype PKCS12 -pwd \"" + certificatePassword + "\" -itype \"silent\"";
+
+            return await SendActionToDevicesAsync(deviceId, new Api.ActionInfo(Api.ActionType.SendScript, installCertCommand));
+        }
+
     }
 
-   
+
+
 
 }
 

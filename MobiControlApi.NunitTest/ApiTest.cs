@@ -141,6 +141,33 @@ namespace MobiControlApi.NunitTest
 
         }
 
+        // Test action
+        [Test()]
+        public async Task InstallCertificateOnDevice()
+        {
+            #region Setup conditions
+            string deviceId = "353857081083640";
+            string p12FilePath = "/sdcard/Download/test.pfx";
+            string certificatePassword = "1234";
+            #endregion
+
+
+            #region Execute code
+
+            // Request SOTI to install PKCS #12 client certificate bundle 
+            bool result = await mcApi.InstallCertificateOnDevice(deviceId, p12FilePath, certificatePassword);
+
+            #endregion
+
+
+            #region Make assertion(s) on the result
+            // This value must match the number of devices in at given group on the server
+            Assert.AreEqual(true, result);
+
+            #endregion
+
+        }
+
 
         // Test action
         [Test()]
