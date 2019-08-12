@@ -27,7 +27,7 @@ namespace MobiControlApi
         private JArray MobiControlFolderssToMonitorJson;
 
         // SOTI Server API
-        Api mcApi;
+        public Api mcApi;
         public List<MonitorSotiFolder> listMonitorSotiFolder;
 
         // Constructor
