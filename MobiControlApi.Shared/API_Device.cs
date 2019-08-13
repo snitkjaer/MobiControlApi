@@ -217,8 +217,25 @@ namespace MobiControlApi
             string resourcePath = "devices/" + deviceId;
 
             string jsonDevice = await GetJsonAsync(resourcePath);
-            
-            return Device.FromJson(jsonDevice);
+
+            Device device = null;
+
+            try
+            {
+                if (!String.IsNullOrWhiteSpace(jsonDevice))
+                    device = Device.FromJson(jsonDevice);
+            }
+            catch(Exception ex)
+            {
+                TrackException(ex);
+            }
+
+            if(device != null)
+            {
+                Log("DeviceId " + deviceId + " was found", SeverityLevel.Verbose);
+            }
+
+            return device;
         }
     }
 }
