@@ -51,6 +51,10 @@ namespace MobiControlApi
                 listMonitorSotiFolder.Add(monitorSotiGroup);
 
             }
+
+            // Validate connnection to the MC server
+            mcApi = new Api(MobiControlApiConfigJson, tc, token);
+
         }
 
         // List of monitoring tasks
