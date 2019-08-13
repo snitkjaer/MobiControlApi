@@ -23,6 +23,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)API_CustomAttributes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)API_Action.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)API_Packages.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)API_Device.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)MobiControlServerApiConfig.json">

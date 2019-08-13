@@ -168,8 +168,33 @@ namespace MobiControlApi.NunitTest
 
         }
 
+        // Test GetDeviceAsync
+        [Test()]
+        public async Task GetDeviceAsync()
+        {
+            #region Setup conditions
+            string deviceId = "353857081083640";
+            #endregion
 
-        // Test action
+
+            #region Execute code
+
+            // Request SOTI to install PKCS #12 client certificate bundle 
+            Device result = await mcApi.GetDeviceAsync(deviceId);
+
+            #endregion
+
+
+            #region Make assertion(s) on the result
+            // This value must match the number of devices in at given group on the server
+            Assert.AreEqual(deviceId, result.DeviceId);
+
+            #endregion
+
+        }
+
+
+        // Test package upload
         [Test()]
         public async Task UploadPackage()
         {
