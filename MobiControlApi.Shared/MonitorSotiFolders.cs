@@ -75,7 +75,9 @@ namespace MobiControlApi
 
                 }
 
-                
+                // Start the monitoring task (CacheDevices)
+                mcApi.StartMonitor().ConfigureAwait(false);
+
                 // Create task list for each SOTI folder to be monitored
                 foreach (var group in listMonitorSotiFolder)
                 {

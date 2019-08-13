@@ -54,8 +54,6 @@ namespace MobiControlApi
             serviceProvider = services.BuildServiceProvider();
             */
 
-            // Start the monitoring task
-            StartMonitor().ConfigureAwait(false);
         }
 
         //
