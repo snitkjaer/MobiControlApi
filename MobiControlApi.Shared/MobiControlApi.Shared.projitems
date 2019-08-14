@@ -26,11 +26,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)API_Device.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)MobiControlServerApiConfig.json">
+    <None Include="$(MSBuildThisFileDirectory)MobiControlServerApiConfig.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)MobiControlServerApiConfig_Template.json" />
+    <Content Include="$(MSBuildThisFileDirectory)MobiControlServerApiConfig_Template.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>
