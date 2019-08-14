@@ -26,9 +26,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)API_Device.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)MobiControlServerApiConfig.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobiControlServerApiConfig.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)MobiControlServerApiConfig_Template.json">
