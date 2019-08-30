@@ -33,12 +33,16 @@ namespace MobiControlApi
          */
 
         public MonitorSotiFolder(string jsonConfig, List<string> listStartKnownDeviceIds, TelemetryClient tc, CancellationToken token)
+            :this (MonitorSotiFolderConfig.GetConfigFromJsonString(jsonConfig), listStartKnownDeviceIds, tc,token)
+        {}
+
+        public MonitorSotiFolder(MonitorSotiFolderConfig config, List<string> listStartKnownDeviceIds, TelemetryClient tc, CancellationToken token)
         {
             this.token = token;
             this.tc = tc;
 
             // Import ćonfig from json
-            monitorSotiGroupConfig = MonitorSotiFolderConfig.GetConfigFromJsonString(jsonConfig);
+            monitorSotiGroupConfig = config;
 
 
             // If we get a null list of know devices - create an empty list.
@@ -49,7 +53,7 @@ namespace MobiControlApi
             else
                 listKnownDeviceIds = new List<string>();
 
-        }   
+        }
 
         // Start monitoring of a folder at an interval
         public async Task<int> Start(Api mcApi)

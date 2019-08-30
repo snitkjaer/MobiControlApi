@@ -24,28 +24,30 @@ namespace MobiControlApi
 
         // Configuration input
         private JObject MobiControlApiConfigJson;
-        private JArray MobiControlFolderssToMonitorJson;
+        //private JArray MobiControlFolderssToMonitorJson;
+        private MobiControlApiConfig MobiControlApiConfig;
+        private List<MonitorSotiFolderConfig> listMonitorSotiFolderConfig;
 
         // SOTI Server API
         public Api mcApi;
         public List<MonitorSotiFolder> listMonitorSotiFolder;
 
         // Constructor
-        public MonitorSotiFolders(JObject mobiControlApiConfigJson, JArray mobiControlGroupsToMonitorJson, TelemetryClient tc, CancellationToken token)
+        public MonitorSotiFolders(MobiControlApiConfig mobiControlApiConfig, List<MonitorSotiFolderConfig> listMonitorSotiFolderConfig, TelemetryClient tc, CancellationToken token)
         {
             this.token = token;
             this.tc = tc;
-            MobiControlApiConfigJson = mobiControlApiConfigJson;
-            MobiControlFolderssToMonitorJson = mobiControlGroupsToMonitorJson;
+            this.listMonitorSotiFolderConfig = listMonitorSotiFolderConfig;
+            this.MobiControlApiConfig = mobiControlApiConfig;
 
             // Start a task for each SOTI folder to be monitored
             listMonitorSotiFolder = new List<MonitorSotiFolder>();
 
             // Create task list for each SOTI folder to be monitored
-            foreach (var group in MobiControlFolderssToMonitorJson)
+            foreach (MonitorSotiFolderConfig folder in listMonitorSotiFolderConfig)
             {
                 // Start monitoring folder but dont pass any know devices i.e. on start (or restart) all will come up as new devices
-                MonitorSotiFolder monitorSotiGroup = new MonitorSotiFolder(group.ToString(), null, tc, token);
+                MonitorSotiFolder monitorSotiGroup = new MonitorSotiFolder(folder, null, tc, token);
                 monitorSotiGroup.NewDeviceList += MonitorSotiGroup_NewDeviceList;
                 monitorSotiGroup.RemovedDeviceList += MonitorSotiGroup_RemovedDeviceList;
                 listMonitorSotiFolder.Add(monitorSotiGroup);
@@ -56,6 +58,9 @@ namespace MobiControlApi
             mcApi = new Api(MobiControlApiConfigJson, tc, token);
 
         }
+
+       // public MonitorSotiFolders(JObject mobiControlApiConfigJson, JArray mobiControlGroupsToMonitorJson, TelemetryClient tc, CancellationToken token)
+       //     :this
 
         // List of monitoring tasks
         List<Task> listTask;
