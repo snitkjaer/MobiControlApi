@@ -23,8 +23,6 @@ namespace MobiControlApi
         CancellationToken token;
 
         // Configuration input
-        private JObject MobiControlApiConfigJson;
-        //private JArray MobiControlFolderssToMonitorJson;
         private MobiControlApiConfig MobiControlApiConfig;
         private List<MonitorSotiFolderConfig> listMonitorSotiFolderConfig;
 
@@ -55,7 +53,7 @@ namespace MobiControlApi
             }
 
             // Validate connnection to the MC server
-            mcApi = new Api(MobiControlApiConfigJson, tc, token);
+            mcApi = new Api(mobiControlApiConfig, tc, token);
 
         }
 
@@ -76,7 +74,7 @@ namespace MobiControlApi
                 if (mcApi == null)
                 {
                     // Validate connnection to the MC server
-                    mcApi = new Api(MobiControlApiConfigJson, tc, token);
+                    mcApi = new Api(MobiControlApiConfig, tc, token);
 
                 }
 
@@ -110,7 +108,7 @@ namespace MobiControlApi
             {
                 if (mcApi == null)
                     // Validate connnection to the MC server
-                    mcApi = new Api(MobiControlApiConfigJson, tc, token);
+                    mcApi = new Api(MobiControlApiConfig, tc, token);
 
                 // Itterate over monitored groups and return device list
                 foreach (var group in listMonitorSotiFolder)
@@ -139,7 +137,7 @@ namespace MobiControlApi
             {
                 if (mcApi == null)
                     // Validate connnection to the MC server
-                    mcApi = new Api(MobiControlApiConfigJson, tc, token);
+                    mcApi = new Api(MobiControlApiConfig, tc, token);
 
                 // Itterate over monitored groups and return device dict
                 foreach (var group in listMonitorSotiFolder)

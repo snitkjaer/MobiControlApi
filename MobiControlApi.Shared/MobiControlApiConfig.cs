@@ -22,9 +22,9 @@ namespace MobiControlApi
 
         // Cache
         public bool CacheDevices = false;
-        public string CacheUpdateInterval;
-        public string MaxSotiResponseTime;
-        public string MaxCacheAge;
+        public string CacheUpdateInterval = null;
+        public string MaxSotiResponseTime = null;
+        public string MaxCacheAge = null;
 
         public TimeSpan tsCacheUpdateInterval => XmlConvert.ToTimeSpan(CacheUpdateInterval);
         public TimeSpan tsMaxSotiResponseTime => XmlConvert.ToTimeSpan(MaxSotiResponseTime);
