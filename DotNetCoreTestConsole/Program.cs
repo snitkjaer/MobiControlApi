@@ -28,9 +28,16 @@ namespace DotNetCoreTestConsole
                 // SOTI Server API
                 Api mcApi = new Api(mobiControlApiConfig, null, cts.Token);
 
-                // Get device groups json
-                string resultJson = await mcApi.GetJsonAsync("devicegroups");
-				Console.Write(resultJson);
+
+                while(true)
+                {
+                    // Get device groups json
+                    string resultJson = await mcApi.GetJsonAsync("devicegroups");
+                    Console.Write(resultJson);
+
+                    Thread.Sleep(1000);
+                }
+
 
 			}
 			catch (Exception ex)
@@ -38,7 +45,7 @@ namespace DotNetCoreTestConsole
                 Console.Write(ex.ToString());
             }
 
-			Console.ReadLine();
+
 
 		}
     }

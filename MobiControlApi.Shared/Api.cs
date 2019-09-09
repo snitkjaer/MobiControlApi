@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.DataContracts;
+using System.Net;
 
 namespace MobiControlApi
 {
@@ -53,6 +54,7 @@ namespace MobiControlApi
             services.AddHttpClient<SotiHttpClient>();
             serviceProvider = services.BuildServiceProvider();
             */
+            Init_httpClient();
 
         }
 
@@ -198,6 +200,7 @@ namespace MobiControlApi
                 return false;
         }
 
+
         // Send request to SOTI API
         private async Task<HttpResponseMessage> SendSotiRequest(HttpRequestMessage request)
         {
@@ -209,11 +212,12 @@ namespace MobiControlApi
 
             HttpResponseMessage response;
 
+
+            HttpClient httpClient = await GetSotiHttpClient(authentication);
+            
             // Get httpclient for SOTI mobicontrol
-            using (HttpClient httpClient = await GetSotiHttpClient(authentication))
-            {
-                response = await httpClient.SendAsync(request, cancellationToken);
-            }
+
+            response = await httpClient.SendAsync(request, cancellationToken);
 
             // If error log it
             if (!response.IsSuccessStatusCode)
@@ -226,6 +230,7 @@ namespace MobiControlApi
 
         }
 
+
         // Create new httpclient for SOTI mobicontrol
         // TODO can we reuse the httpclient??  https://medium.com/@nuno.caneco/c-httpclient-should-not-be-disposed-or-should-it-45d2a8f568bc
         //  Maybe use HttpClientFactory??  https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-2.2
@@ -235,17 +240,32 @@ namespace MobiControlApi
             if (sotiToken == null)
                 return null;
 
-            HttpClient httpClient = new HttpClient();
-            httpClient.Timeout = httpTimeout;
-            httpClient.DefaultRequestHeaders.Clear();
-            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + sotiToken);
+            
+            httpClientInstance.DefaultRequestHeaders.Clear();
+            httpClientInstance.DefaultRequestHeaders.Add("Authorization", "Bearer " + sotiToken);
 
-            return httpClient;
+            return httpClientInstance;
         }
 
 
 
+        internal static HttpClient httpClientInstance;
 
+        protected void Init_httpClient()
+        {
+
+            
+
+            httpClientInstance = new HttpClient();
+            httpClientInstance.BaseAddress = config.baseUri;
+            httpClientInstance.Timeout = httpTimeout;
+            httpClientInstance.DefaultRequestHeaders.Clear();
+            httpClientInstance.DefaultRequestHeaders.ConnectionClose = false;
+            httpClientInstance.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json"));
+
+            ServicePointManager.FindServicePoint(config.baseUri).ConnectionLeaseTimeout = 60 * 1000;
+        }
 
 
         #endregion
