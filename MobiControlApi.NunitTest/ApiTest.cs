@@ -194,6 +194,7 @@ namespace MobiControlApi.NunitTest
         }
 
 
+        
         // Test package upload
         [Test()]
         public async Task UploadPackage()
@@ -205,7 +206,7 @@ namespace MobiControlApi.NunitTest
 
             #region Execute code
 
-            // Set attribute
+            // Upload test package
             bool result = await mcApi.UploadPackageAsync(filePath);
 
             #endregion
@@ -220,7 +221,7 @@ namespace MobiControlApi.NunitTest
         }
 
 
-
+        
 
 
 

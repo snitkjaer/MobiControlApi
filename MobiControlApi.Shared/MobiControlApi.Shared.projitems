@@ -24,13 +24,20 @@
     <Compile Include="$(MSBuildThisFileDirectory)API_Action.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)API_Packages.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)API_Device.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)MobiControlServerApiConfig.json" />
+  <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <Content Include="$(MSBuildThisFileDirectory)MobiControlServerApiConfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(Configuration)' == 'Release' ">
+    <Content Include="$(MSBuildThisFileDirectory)MobiControlServerApiConfig.json">
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)MobiControlServerApiConfig_Template.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 </Project>

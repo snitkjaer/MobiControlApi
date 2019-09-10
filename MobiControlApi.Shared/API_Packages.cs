@@ -29,6 +29,10 @@ namespace MobiControlApi
         Base64-encoded package data 
         --foo_bar_baz--
          */
+
+
+        private static string boundary = "----CustomBoundary" + DateTime.Now.Ticks.ToString("x");
+
         public async Task<bool> UploadPackageAsync(string filePath)
         {
             // POST /packages
@@ -42,8 +46,81 @@ namespace MobiControlApi
                 return false;
             }
 
-            byte[] bytes = System.IO.File.ReadAllBytes(filePath);
-            string file = Convert.ToBase64String(bytes);
+            // base64 encoded file stream
+            //Stream fs = File.Create(filePath).ConvertToBase64();
+
+
+            byte[] bytes = File.ReadAllBytes(filePath);
+            //string file = Convert.ToBase64String(bytes);
+
+            // var file_content = new ByteArrayContent(new StreamContent(fs).ReadAsByteArrayAsync().Result);
+
+
+            ByteArrayContent file_content = new ByteArrayContent(bytes);
+            file_content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.soti.mobicontrol.package");
+            file_content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+            {
+                FileName = Path.GetFileName(filePath)
+            };
+            file_content.Headers.ContentEncoding.Add("Base64");
+
+
+            JObject objDeviceFamily = new JObject(
+                new JProperty("deviceFamily", "AndroidPlus"));
+
+            string strDeviceFamily = JsonConvert.SerializeObject(objDeviceFamily);
+
+            StringContent Device_content = new StringContent(strDeviceFamily);
+            Device_content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.soti.mobicontrol.package.metadata+json");
+
+            // Update authentication header
+            await UpdateHeaders();
+
+
+            using (var formData = new MultipartFormDataContent(boundary))
+            {
+                formData.Add(Device_content);
+                formData.Add(file_content);
+
+                formData.Headers.Remove("Content-Type");
+                formData.Headers.TryAddWithoutValidation("Content-Type", "multipart/related; boundary=" + boundary);
+
+                HttpResponseMessage response = await httpClientInstance.PostAsync(resourcePath, formData);
+                if (response.IsSuccessStatusCode)
+                    return true;
+                else
+                    return false;
+
+            }
+
+
+
+
+
+
+        }
+
+        /*
+
+        public async Task<bool> UploadPackageAsync2(string filePath)
+        {
+            // POST /packages
+
+            // Generate resourcePath
+            string resourcePath = "packages/";
+
+            if (!File.Exists(filePath))
+            {
+                Log("File not fouund " + filePath, SeverityLevel.Error);
+                return false;
+            }
+
+            // base64 encoded file stream
+            Stream fs = File.Create(filePath).ConvertToBase64();
+
+
+            //byte[] bytes = File.ReadAllBytes(filePath);
+            //string file = Convert.ToBase64String(bytes);
 
 
             JObject objDeviceFamily = new JObject(
@@ -56,31 +133,62 @@ namespace MobiControlApi
 
             // add API method parameters
             multiForm.Add(new StringContent(strDeviceFamily), "application/vnd.soti.mobicontrol.package.metadata+json");
-            multiForm.Add(new StringContent(Path.GetFileName(filePath)), "filename");
-            multiForm.Add(new StringContent(file), "file", Path.GetFileName(filePath));
+            multiForm.Add(new StreamContent(fs), "application/vnd.soti.mobicontrol.package");
 
-            var uri = new Uri(config.baseUri, resourcePath);
 
-            HttpResponseMessage response;
 
-            // Get httpclient for SOTI mobicontrol
-            using (HttpClient httpClient = await GetSotiHttpClient(authentication))
+            // Create http request 
+            var request = new HttpRequestMessage
             {
-                response = await httpClient.PostAsync(uri, multiForm, cancellationToken);
-            }
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(config.baseUri, resourcePath),
+            };
+            request.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("multipart/related") { CharSet = "UTF-8" };
+             = multiForm;
 
-            // If error log it
-            if (!response.IsSuccessStatusCode)
-            {
-                Log("Http request error with status code " + response.StatusCode + " with reason" +
-                    " " + response.ReasonPhrase, SeverityLevel.Error);
-            }
-
-
+            HttpResponseMessage response = await SendSotiRequest(request);
             if (response.IsSuccessStatusCode)
                 return true;
             else
                 return false;
+
+        }
+        */
+
+
+
+
+
+        public async Task UploadPackageAsync3(string path)
+        {
+            Console.WriteLine("Uploading {0}", path);
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    using (var stream = File.OpenRead(path))
+                    {
+                        var content = new MultipartFormDataContent();
+                        var file_content = new ByteArrayContent(new StreamContent(stream).ReadAsByteArrayAsync().Result);
+                        file_content.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+                        file_content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+                        {
+                            FileName = "screenshot.png",
+                            Name = "foo",
+                        };
+                        content.Add(file_content);
+                        client.BaseAddress = new Uri("https://pajlada.se/poe/imgup/");
+                        var response = await client.PostAsync("upload.php", content);
+                        response.EnsureSuccessStatusCode();
+                        Console.WriteLine("Done");
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Something went wrong while uploading the image");
+            }
         }
 
     }

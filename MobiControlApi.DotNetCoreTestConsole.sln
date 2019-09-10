@@ -1,15 +1,19 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobiControlApi.DotNetCoreTestConsole", "DotNetCoreTestConsole\MobiControlApi.DotNetCoreTestConsole.csproj", "{60356C84-4B37-42BF-B7E9-2782BDDCBD4E}"
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29230.47
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MobiControlApi.DotNetCoreTestConsole", "DotNetCoreTestConsole\MobiControlApi.DotNetCoreTestConsole.csproj", "{60356C84-4B37-42BF-B7E9-2782BDDCBD4E}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MobiControlApi.Shared", "MobiControlApi.Shared\MobiControlApi.Shared.shproj", "{A93CDC4B-B0E4-4FD6-B16B-608DE00EBC90}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobiControlApi.NunitTest", "MobiControlApi.NunitTest\MobiControlApi.NunitTest.csproj", "{E91D79E8-B96A-4C1D-B6E1-A2BB618B92FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobiControlApi.Lib", "MobiControlApi.Lib\MobiControlApi.Lib.csproj", "{06A31EB1-8721-4BFB-A352-E7FE338AE02C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MobiControlApi.Lib", "MobiControlApi.Lib\MobiControlApi.Lib.csproj", "{06A31EB1-8721-4BFB-A352-E7FE338AE02C}"
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		MobiControlApi.Shared\MobiControlApi.Shared.projitems*{a93cdc4b-b0e4-4fd6-b16b-608de00ebc90}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -27,6 +31,12 @@ Global
 		{06A31EB1-8721-4BFB-A352-E7FE338AE02C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06A31EB1-8721-4BFB-A352-E7FE338AE02C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06A31EB1-8721-4BFB-A352-E7FE338AE02C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EBD61318-22FB-483B-918B-24E9A79579AE}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		version = 0.3

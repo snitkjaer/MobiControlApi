@@ -28,7 +28,7 @@ namespace MobiControlApi
 		MobiControlApiConfig config;
 		string grant_type;
 	    string Token;
-		DateTime TokenExpireTime;
+		DateTime? TokenExpireTime;
         public TimeSpan httpTimeout = new TimeSpan(0, 0, 20);
 
         // HttpClient used for authentication requests
@@ -52,33 +52,38 @@ namespace MobiControlApi
 
         }
         
-		// Get authentication header
+		// Get authentication token and lat caller konw it it's new
 		public async Task<string> GetAuthenticationToken()
         {
-			ValidateToken();
+            ValidateToken();
             
             // If Token is null or expired
             if (Token == null)
             {
-				// Request new token
-				if (!await RequestToken())
+                // Request new token
+                if (!await RequestToken())
 					return null;             
             }
-			return Token;       
+
+            return Token;    
         }
 
+        // Validate the token
 		private void ValidateToken()
 		{
 			try
 			{
+                // If the token is defined
 				if (Token != null)
 				{
+                    // If expire time is undefined i.e. null
 					if (TokenExpireTime == null)
 					{
 						Token = null;
 					}
 					else
 					{
+                        // If the token has expired
 						if (DateTime.Now > TokenExpireTime)
                             Token = null;
 					}               
@@ -90,6 +95,7 @@ namespace MobiControlApi
 			}
 		}
 
+        // Request a token
         private async Task<bool> RequestToken()
         {
             try

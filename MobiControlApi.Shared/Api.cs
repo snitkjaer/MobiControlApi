@@ -19,13 +19,8 @@ namespace MobiControlApi
         private readonly CancellationToken cancellationToken;
         private readonly MobiControlApiConfig config;
 
-        /*
-        private readonly IHttpClientFactory httpClientFactory;
+        internal static HttpClient httpClientInstance;
 
-        ServiceCollection services = new ServiceCollection();
-        ServiceProvider serviceProvider;
-        */
-        //private static readonly HttpClient httpClient = new HttpClient();
         private readonly Authentication authentication;
 
         private static TimeSpan httpTimeout = new TimeSpan(0, 0, 20);  // 20 sec
@@ -49,14 +44,23 @@ namespace MobiControlApi
             // Create SOTI Authentication object
             authentication = new Authentication(config, cancellationToken);
 
-            /*
-            // Register a HTTP Client
-            services.AddHttpClient<SotiHttpClient>();
-            serviceProvider = services.BuildServiceProvider();
-            */
+            // Initiate the HTTP Client
             Init_httpClient();
 
         }
+
+
+        protected void Init_httpClient()
+        {
+
+            httpClientInstance = new HttpClient();
+            httpClientInstance.BaseAddress = config.baseUri;
+            httpClientInstance.Timeout = httpTimeout;
+            httpClientInstance.DefaultRequestHeaders.Clear();
+            httpClientInstance.DefaultRequestHeaders.ConnectionClose = false;
+            ServicePointManager.FindServicePoint(config.baseUri).ConnectionLeaseTimeout = 60 * 1000;
+        }
+
 
         //
         // Alternative constructor overloads
@@ -104,10 +108,12 @@ namespace MobiControlApi
         }
 
 
+
+
         // This is the lowest level of the API - accepting raw resource path and retruning a json string
         #region low level SOTI REST Web API 
 
-        // Get
+        // Get json
         public async Task<string> GetJsonAsync(string resourcePath)
         {
 
@@ -127,7 +133,7 @@ namespace MobiControlApi
 
         }
 
-        // Post
+        // Post json
         public async Task<bool> PostJsonAsync(string resourcePath, string body)
         {
 
@@ -189,7 +195,6 @@ namespace MobiControlApi
                 RequestUri = new Uri(config.baseUri, resourcePath),
                 Content = new StringContent(body),
 
-
             };
             request.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue(ContentType) { CharSet = "UTF-8" };
 
@@ -200,24 +205,27 @@ namespace MobiControlApi
                 return false;
         }
 
+        private async Task UpdateHeaders()
+        {
+            // Add SOTI Authorization header
+            httpClientInstance.DefaultRequestHeaders.Clear();
+            httpClientInstance.DefaultRequestHeaders.ConnectionClose = false;
+
+            string Token = await authentication.GetAuthenticationToken();
+            httpClientInstance.DefaultRequestHeaders.Add("Authorization", "Bearer " + Token);
+        }
+
 
         // Send request to SOTI API
         private async Task<HttpResponseMessage> SendSotiRequest(HttpRequestMessage request)
         {
-            /*
-            // Get a HTTP Client and make a request
-            var sotiClient = serviceProvider.GetRequiredService<SotiHttpClient>();
-            return await sotiClient.Get(request, cancellationToken);
-              */
-
+            // Define response message
             HttpResponseMessage response;
 
+            await UpdateHeaders();
 
-            HttpClient httpClient = await GetSotiHttpClient(authentication);
-            
-            // Get httpclient for SOTI mobicontrol
-
-            response = await httpClient.SendAsync(request, cancellationToken);
+            // Call SOTI MobiControl
+            response = await httpClientInstance.SendAsync(request, cancellationToken);
 
             // If error log it
             if (!response.IsSuccessStatusCode)
@@ -230,42 +238,6 @@ namespace MobiControlApi
 
         }
 
-
-        // Create new httpclient for SOTI mobicontrol
-        // TODO can we reuse the httpclient??  https://medium.com/@nuno.caneco/c-httpclient-should-not-be-disposed-or-should-it-45d2a8f568bc
-        //  Maybe use HttpClientFactory??  https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-2.2
-        private static async Task<HttpClient> GetSotiHttpClient(Authentication authentication)
-        {
-            string sotiToken = await authentication.GetAuthenticationToken();
-            if (sotiToken == null)
-                return null;
-
-            
-            httpClientInstance.DefaultRequestHeaders.Clear();
-            httpClientInstance.DefaultRequestHeaders.Add("Authorization", "Bearer " + sotiToken);
-
-            return httpClientInstance;
-        }
-
-
-
-        internal static HttpClient httpClientInstance;
-
-        protected void Init_httpClient()
-        {
-
-            
-
-            httpClientInstance = new HttpClient();
-            httpClientInstance.BaseAddress = config.baseUri;
-            httpClientInstance.Timeout = httpTimeout;
-            httpClientInstance.DefaultRequestHeaders.Clear();
-            httpClientInstance.DefaultRequestHeaders.ConnectionClose = false;
-            httpClientInstance.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
-
-            ServicePointManager.FindServicePoint(config.baseUri).ConnectionLeaseTimeout = 60 * 1000;
-        }
 
 
         #endregion
