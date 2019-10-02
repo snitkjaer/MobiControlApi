@@ -63,7 +63,10 @@ namespace MobiControlApi
             List<string> listRemovedDevices;
             List<string> listCurrentDevices = new List<string>();
 
-            Log("Scanning SOTI folder '" + monitorSotiGroupConfig.FolderPath + "' every " + monitorSotiGroupConfig.tsInterval.ToString(), SeverityLevel.Information);
+            if(monitorSotiGroupConfig.IncludeSubFolders)
+                Log("Scanning SOTI folder '" + monitorSotiGroupConfig.FolderPath + "' including sub folders every " + monitorSotiGroupConfig.tsInterval.ToString(), SeverityLevel.Information);
+            else
+                Log("Scanning SOTI folder '" + monitorSotiGroupConfig.FolderPath + "' every " + monitorSotiGroupConfig.tsInterval.ToString(), SeverityLevel.Information);
 
             // Start monitoring loop
             while (!token.IsCancellationRequested)
@@ -75,7 +78,7 @@ namespace MobiControlApi
                     stopWatch.Start();
 
                     // Get current devices in SOTI folder from server
-                    listCurrentDevices = await mcApi.GetDeviceIdListAsync(monitorSotiGroupConfig.FolderPath, false);
+                    listCurrentDevices = await mcApi.GetDeviceIdListAsync(monitorSotiGroupConfig.FolderPath, monitorSotiGroupConfig.IncludeSubFolders);
 
                     // Stop
                     stopWatch.Stop();
@@ -149,12 +152,12 @@ namespace MobiControlApi
 
         public async Task<List<string>> GetDeviceIdListAsync(Api mcApi)
         {
-            return await mcApi.GetDeviceIdListAsync(monitorSotiGroupConfig.FolderPath, false); 
+            return await mcApi.GetDeviceIdListAsync(monitorSotiGroupConfig.FolderPath, monitorSotiGroupConfig.IncludeSubFolders); 
         }
 
         public async Task<List<Device>> GetDeviceListAsync(Api mcApi)
         {
-            return await mcApi.GetDeviceListAsync(monitorSotiGroupConfig.FolderPath, false);
+            return await mcApi.GetDeviceListAsync(monitorSotiGroupConfig.FolderPath, monitorSotiGroupConfig.IncludeSubFolders);
         }
     }
 }

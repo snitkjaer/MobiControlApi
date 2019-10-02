@@ -9,6 +9,14 @@ namespace MobiControlApi
     {
         public string FolderPath;
         string Interval;
+        public bool IncludeSubFolders = false;
+
+        public MonitorSotiFolderConfig(string folderPath, string interval, bool includeSubFolders)
+        {
+            FolderPath = folderPath;
+            Interval = interval;
+            IncludeSubFolders = includeSubFolders;
+        }
 
         public MonitorSotiFolderConfig(string folderPath, string interval)
         {
@@ -26,6 +34,7 @@ namespace MobiControlApi
             {
               "FolderPath" : "",
               "Interval" : "PT30S"
+              "IncludeSubFolders" : true
             }      
          */
 
