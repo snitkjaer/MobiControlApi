@@ -18,12 +18,6 @@ namespace MobiControlApi
             IncludeSubFolders = includeSubFolders;
         }
 
-        public MonitorSotiFolderConfig(string folderPath, string interval)
-        {
-            FolderPath = folderPath;
-            Interval = interval;
-        }
-
         public TimeSpan tsInterval => XmlConvert.ToTimeSpan(Interval);
 
 
