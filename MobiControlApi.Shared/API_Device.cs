@@ -119,7 +119,7 @@ namespace MobiControlApi
         }
 
         // Get list of devices
-        public async Task<List<Device>> GetDeviceListFromSotiAsync(string deviceGroupPath, bool includeSubgroups)
+        private async Task<List<Device>> GetDeviceListFromSotiAsync(string deviceGroupPath, bool includeSubgroups)
         {
             System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
 
@@ -138,7 +138,7 @@ namespace MobiControlApi
                 {
                     // Get devices in SOTI folder
                     if (useSearchDbToGetDevices)
-                        resultJson = await GetDeviceListJsonSearchDbAsync(deviceGroupPath, null, false, true, deviceOffset, deviceOffset + deviceBatchSize);
+                        resultJson = await GetDeviceListJsonSearchDbAsync(deviceGroupPath, null, includeSubgroups, true, deviceOffset, deviceOffset + deviceBatchSize);
                     else
                         resultJson = await GetDeviceListJsonFromSotiDbAsync(deviceGroupPath, deviceOffset, deviceOffset + deviceBatchSize);
 
@@ -191,7 +191,6 @@ namespace MobiControlApi
                 Log("Exception getting device list for '" + deviceGroupPath + "' in " + stopWatch.Elapsed.ToString(), SeverityLevel.Error);
                 TrackException(ex);
             }
-
 
 
 
