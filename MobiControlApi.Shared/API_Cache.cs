@@ -136,24 +136,27 @@ namespace MobiControlApi
 
         }
 
+        object lockObjectCacheUpdate = new object();
+
         private async Task UpdateCachedDeviceList()
         {
 
-            try
-            {
-                // Update list Cache Devices
-                useSearchDbToGetDevices = true;
-                List<Device> deviceList = await GetDeviceListFromSotiAsync("/", true);
-                CacheLastUpdate = DateTime.Now;
-                listCacheDevices = deviceList;
+            if (Monitor.TryEnter(lockObjectCacheUpdate, 5000))            {                try                {
+                    // Place code protected by the Monitor here.  
+                    // Update list Cache Devices
+                    useSearchDbToGetDevices = true;
+                    List<Device> deviceList = await GetDeviceListFromSotiAsync("/", true);
+                    CacheLastUpdate = DateTime.Now;
+                    listCacheDevices = deviceList;
+                }
+                catch (Exception ex)
+                {
+                    Log("Exception updating SOTI cached device list", SeverityLevel.Error);
+                    TrackException(ex);
+                }                finally                {                    Monitor.Exit(lockObjectCacheUpdate);                }            }            else            {
+                // Code to execute if the attempt times out.  
+                Log("Timeout waiting for UpdateCachedDeviceList to free up from another thread ", SeverityLevel.Error);            }
 
-
-            }
-            catch (Exception ex)
-            {
-                Log("Exception updating SOTI cached device list", SeverityLevel.Error);
-                TrackException(ex);
-            }
 
         }
 

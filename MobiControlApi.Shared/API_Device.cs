@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Microsoft.ApplicationInsights.DataContracts;
+using System.Threading;
 
 namespace MobiControlApi
 {
@@ -118,83 +119,85 @@ namespace MobiControlApi
                 return await GetDeviceListFromSotiAsync(deviceGroupPath, includeSubgroups);
         }
 
+        object lockObjectGetDeviceList = new object();
+
         // Get list of devices
         private async Task<List<Device>> GetDeviceListFromSotiAsync(string deviceGroupPath, bool includeSubgroups)
         {
-            System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
 
-            List<Device> listDevices = new List<Device>();
+            if (Monitor.TryEnter(lockObjectGetDeviceList, 5000))            {
+                System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
 
-            int deviceOffset = 0;
-            int deviceBatchSize = 50;
-            string resultJson = null;
+                List<Device> listDevices = new List<Device>();
 
-            try
-            {
-                stopWatch.Start();
+                int deviceOffset = 0;
+                int deviceBatchSize = 50;
+                string resultJson = null;
 
-                // SOTI API only returns a batch of 50 devices - continue to itterate over device batche
-                while (true)
+                try
                 {
-                    // Get devices in SOTI folder
-                    if (useSearchDbToGetDevices)
-                        resultJson = await GetDeviceListJsonSearchDbAsync(deviceGroupPath, null, includeSubgroups, true, deviceOffset, deviceOffset + deviceBatchSize);
-                    else
-                        resultJson = await GetDeviceListJsonFromSotiDbAsync(deviceGroupPath, deviceOffset, deviceOffset + deviceBatchSize);
+                    stopWatch.Start();
 
-
-                    // If we got a result - parse it
-                    if (resultJson != null)
+                    // SOTI API only returns a batch of 50 devices - continue to itterate over device batche
+                    while (true)
                     {
-                        // String to json array
-                        JArray devices = JArray.Parse(resultJson);
+                        // Get devices in SOTI folder
+                        if (useSearchDbToGetDevices)
+                            resultJson = await GetDeviceListJsonSearchDbAsync(deviceGroupPath, null, includeSubgroups, true, deviceOffset, deviceOffset + deviceBatchSize);
+                        else
+                            resultJson = await GetDeviceListJsonFromSotiDbAsync(deviceGroupPath, deviceOffset, deviceOffset + deviceBatchSize);
 
-                        // Itterate over device found
-                        foreach (JObject deviceJson in devices)
+
+                        // If we got a result - parse it
+                        if (resultJson != null)
                         {
-                            // parse device
-                            Device device = Device.FromJson(deviceJson.ToString());
+                            // String to json array
+                            JArray devices = JArray.Parse(resultJson);
 
-                            if (device != null)
-                                listDevices.Add(device);
+                            // Itterate over device found
+                            foreach (JObject deviceJson in devices)
+                            {
+                                // parse device
+                                Device device = Device.FromJson(deviceJson.ToString());
+
+                                if (device != null)
+                                    listDevices.Add(device);
+                            }
+
+                            // Do we expect more devices?
+                            if (devices.Count == deviceBatchSize)
+                                deviceOffset += deviceBatchSize;
+                            else
+                                break;
                         }
-
-                        // Do we expect more devices?
-                        if (devices.Count == deviceBatchSize)
-                            deviceOffset += deviceBatchSize;
                         else
                             break;
+
+
                     }
-                    else
-                        break;
+
+                    // Stop
+                    stopWatch.Stop();
 
 
-                }
-
-                // Stop
-                stopWatch.Stop();
-
-
-                var properties = new Dictionary<string, string>
+                    var properties = new Dictionary<string, string>
                              {
                                  { "GroupPath", deviceGroupPath },
                                  { "CurrentDeviceCount",listDevices.Count.ToString()}
                              };
-                TrackEvent("SotiGetGroupDeviceList", stopWatch.Elapsed, properties);
+                    TrackEvent("SotiGetGroupDeviceList", stopWatch.Elapsed, properties);
 
-            }
-            catch (Exception ex)
-            {
-                // Stop
-                stopWatch.Stop();
+                }
+                catch (Exception ex)
+                {
+                    // Stop
+                    stopWatch.Stop();
 
-                Log("Exception getting device list for '" + deviceGroupPath + "' in " + stopWatch.Elapsed.ToString(), SeverityLevel.Error);
-                TrackException(ex);
-            }
-
-
-
-            return listDevices;
+                    Log("Exception getting device list for '" + deviceGroupPath + "' in " + stopWatch.Elapsed.ToString(), SeverityLevel.Error);
+                    TrackException(ex);
+                }                finally                {                    Monitor.Exit(lockObjectGetDeviceList);                }                return listDevices;            }            else            {
+                // Code to execute if the attempt times out.  
+                Log("Timeout waiting for UpdateCachedDeviceList to free up from another thread ", SeverityLevel.Error);                return null;            }
 
 
         }
