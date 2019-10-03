@@ -57,6 +57,7 @@ namespace MobiControlApi
             return returnList;
         }
 
+        /*
         // Get list of devices
         public async Task<List<string>> GetCacheDeviceIDListAsync(string deviceGroupPath, bool includeSubgroups)
         {
@@ -69,7 +70,7 @@ namespace MobiControlApi
             return deviceIdList;
 
         }
-
+        */
 
         static readonly object lockObject = new object();
 
@@ -136,28 +137,22 @@ namespace MobiControlApi
 
         }
 
-        object lockObjectCacheUpdate = new object();
 
         private async Task UpdateCachedDeviceList()
         {
-
-            if (Monitor.TryEnter(lockObjectCacheUpdate, 5000))            {                try                {
-                    // Place code protected by the Monitor here.  
-                    // Update list Cache Devices
-                    useSearchDbToGetDevices = true;
-                    List<Device> deviceList = await GetDeviceListFromSotiAsync("/", true);
-                    CacheLastUpdate = DateTime.Now;
-                    listCacheDevices = deviceList;
-                }
-                catch (Exception ex)
-                {
-                    Log("Exception updating SOTI cached device list", SeverityLevel.Error);
-                    TrackException(ex);
-                }                finally                {                    Monitor.Exit(lockObjectCacheUpdate);                }            }            else            {
-                // Code to execute if the attempt times out.  
-                Log("Timeout waiting for UpdateCachedDeviceList to free up from another thread ", SeverityLevel.Error);            }
-
-
+            try            {
+                // Place code protected by the Monitor here.  
+                // Update list Cache Devices
+                useSearchDbToGetDevices = true;
+                List<Device> deviceList = await GetDeviceListFromSotiAsync("/", true);
+                CacheLastUpdate = DateTime.Now;
+                listCacheDevices = deviceList;
+            }
+            catch (Exception ex)
+            {
+                Log("Exception updating SOTI cached device list", SeverityLevel.Error);
+                TrackException(ex);
+            }
         }
 
     }

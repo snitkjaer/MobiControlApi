@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Microsoft.ApplicationInsights.DataContracts;
 using System.Threading;
+using System.Linq;
 
 namespace MobiControlApi
 {
@@ -56,14 +57,21 @@ namespace MobiControlApi
         // Get list of device id's
         public async Task<List<string>> GetDeviceIdListAsync(string deviceGroupPath, bool includeSubgroups)
         {
-            if (CacheDevices)
-                return await GetCacheDeviceIDListAsync(deviceGroupPath, includeSubgroups);
-            else
-                return await GetDeviceIdListFromSotiAsync(deviceGroupPath, includeSubgroups);
+
+            // Update listCacheDevices if needed
+            List<Device> deviceList = await GetCacheDeviceListAsync(deviceGroupPath, includeSubgroups);
+            List<string> deviceIdList = deviceList
+                .Select((arg) => arg.DeviceId)
+                .ToList();
+
+            return deviceIdList;
+
         }
 
+        /*
+
         // Get list of device id's
-        public async Task<List<string>> GetDeviceIdListFromSotiAsync(string deviceGroupPath, bool includeSubgroups)
+        private async Task<List<string>> GetDeviceIdListFromSotiAsync(string deviceGroupPath, bool includeSubgroups)
         {
             List<string> listDeviceIds = new List<string>();
 
@@ -109,6 +117,7 @@ namespace MobiControlApi
 
             return listDeviceIds;
         }
+        */
 
         // Get list of devices
         public async Task<List<Device>> GetDeviceListAsync(string deviceGroupPath, bool includeSubgroups)
