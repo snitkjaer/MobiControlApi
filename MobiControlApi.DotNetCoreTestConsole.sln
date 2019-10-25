@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobiControlApi.NunitTest", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MobiControlApi.Lib", "MobiControlApi.Lib\MobiControlApi.Lib.csproj", "{06A31EB1-8721-4BFB-A352-E7FE338AE02C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobiControlApi.UnitTestMs", "MobiControlApi.UnitTestMs\MobiControlApi.UnitTestMs.csproj", "{28AFFE9D-FC57-4BB5-9A19-F9F69546E7FB}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		MobiControlApi.Shared\MobiControlApi.Shared.projitems*{a93cdc4b-b0e4-4fd6-b16b-608de00ebc90}*SharedItemsImports = 13
@@ -31,6 +33,10 @@ Global
 		{06A31EB1-8721-4BFB-A352-E7FE338AE02C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06A31EB1-8721-4BFB-A352-E7FE338AE02C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06A31EB1-8721-4BFB-A352-E7FE338AE02C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28AFFE9D-FC57-4BB5-9A19-F9F69546E7FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28AFFE9D-FC57-4BB5-9A19-F9F69546E7FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28AFFE9D-FC57-4BB5-9A19-F9F69546E7FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28AFFE9D-FC57-4BB5-9A19-F9F69546E7FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

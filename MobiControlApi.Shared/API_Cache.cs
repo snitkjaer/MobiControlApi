@@ -72,7 +72,7 @@ namespace MobiControlApi
         }
         */
 
-        static readonly object lockObject = new object();
+        
 
 
         Stopwatch stopWatchForceUpdate = new Stopwatch();
@@ -86,30 +86,12 @@ namespace MobiControlApi
             {
                 if(DeltaTime > config.tsMaxCacheAge)
                 {
-                    Log("SOTI device cache is above max age - try forcing update", SeverityLevel.Error);
+                    // If we are just starting cache will alway be expired but listCacheDevices will be null
+                    if (listCacheDevices != null)
+                        Log("SOTI device cache is above max age - try forcing update", SeverityLevel.Error);
 
-                    // This could be called by multiple threads
-                    lock (lockObject)
-                    {
-                        // If some other thread has already started updating the cache
-                        if (stopWatchForceUpdate.IsRunning && stopWatchForceUpdate.Elapsed < config.tsMaxSotiResponseTime)
-                        {
-                            // Skip update - some other thread is already doing it
-                            Log("SOTI device list cache force update in progress - skipping", SeverityLevel.Information);
-                            return;
-                        }
-                        else
-                        {
-                            // Reset and start timer
-                            stopWatchForceUpdate.Stop();
-                            stopWatchForceUpdate.Reset();
-                            stopWatchForceUpdate.Start();
-                        }
-                    }
-
+                    // Call update cache
                     await UpdateCachedDeviceList();
-                    stopWatchForceUpdate.Stop();
-
                 }
                 else
                    Log("SOTI device cache is out of date but not above max age", SeverityLevel.Warning);
@@ -128,31 +110,50 @@ namespace MobiControlApi
 
             while (!cancellationToken.IsCancellationRequested)
             {
+                // Call update cache
                 await UpdateCachedDeviceList();
 
                 // Wait before updating again
                 if (!cancellationToken.IsCancellationRequested)
                     await Task.Delay(config.tsCacheUpdateInterval, cancellationToken);
+
+
             }
 
         }
 
 
+        //static readonly object lockObjectUpdateCachedDeviceList = new object();
+
+        //Instantiate a Singleton of the Semaphore with a value of 1. This means that only 1 thread can be granted access at a time.
+        static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+
         private async Task UpdateCachedDeviceList()
         {
-            try            {
-                // Place code protected by the Monitor here.  
-                // Update list Cache Devices
-                useSearchDbToGetDevices = true;
+            //Asynchronously wait to enter the Semaphore. If no-one has been granted access to the Semaphore, code execution will proceed, otherwise this thread waits here until the semaphore is released 
+            await semaphoreSlim.WaitAsync(cancellationToken);
+            try
+            {
+                // if closing down
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
                 List<Device> deviceList = await GetDeviceListFromSotiAsync("/", true);
                 CacheLastUpdate = DateTime.Now;
                 listCacheDevices = deviceList;
-            }
+            }
             catch (Exception ex)
             {
                 Log("Exception updating SOTI cached device list", SeverityLevel.Error);
                 TrackException(ex);
             }
+            finally
+            {
+                //When the task is ready, release the semaphore. It is vital to ALWAYS release the semaphore when we are ready, or else we will end up with a Semaphore that is forever locked.
+                //This is why it is important to do the Release within a try...finally clause; program execution may crash or take a different path, this way you are guaranteed execution
+                semaphoreSlim.Release();
+            }
+
         }
 
     }

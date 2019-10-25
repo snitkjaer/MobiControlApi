@@ -330,3 +330,4 @@ ASALocalRun/
 .mfractor/
 .DS_Store
 MobiControlApi.Shared/MobiControlServerApiConfig.json
+MobiControlApi.NunitTest/test data/TestPackage/built/TestPackage.pcg

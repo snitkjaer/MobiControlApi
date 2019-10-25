@@ -128,13 +128,11 @@ namespace MobiControlApi
                 return await GetDeviceListFromSotiAsync(deviceGroupPath, includeSubgroups);
         }
 
-        object lockObjectGetDeviceList = new object();
 
         // Get list of devices
         private async Task<List<Device>> GetDeviceListFromSotiAsync(string deviceGroupPath, bool includeSubgroups)
         {
 
-            if (Monitor.TryEnter(lockObjectGetDeviceList, 5000))            {
                 System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
 
                 List<Device> listDevices = new List<Device>();
@@ -204,9 +202,7 @@ namespace MobiControlApi
 
                     Log("Exception getting device list for '" + deviceGroupPath + "' in " + stopWatch.Elapsed.ToString(), SeverityLevel.Error);
                     TrackException(ex);
-                }                finally                {                    Monitor.Exit(lockObjectGetDeviceList);                }                return listDevices;            }            else            {
-                // Code to execute if the attempt times out.  
-                Log("Timeout waiting for UpdateCachedDeviceList to free up from another thread ", SeverityLevel.Error);                return null;            }
+                }                return listDevices;
 
 
         }
