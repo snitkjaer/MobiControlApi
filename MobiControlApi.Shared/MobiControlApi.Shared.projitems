@@ -10,8 +10,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)API\Api.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Devices\CollectedDate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Authentication.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)API\Devices\Device.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Devices\Device.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MobiControlApiConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonitorSotiFolderEvents.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonitorSotiFolders.cs" />
@@ -20,18 +22,15 @@
     <Compile Include="$(MSBuildThisFileDirectory)TimeSpanConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)API\API_Cache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LogAbstraction.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)API\Devices\API_CustomAttributes.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)API\Devices\API_Action.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Devices\API_CustomAttributes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Devices\API_Action.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)API\API_Packages.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)API\Devices\API_Device.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Devices\API_Device.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)MobiControlServerApiConfig_Template.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)API\Devices\" />
   </ItemGroup>
 </Project>

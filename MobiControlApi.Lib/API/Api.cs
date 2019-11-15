@@ -14,7 +14,7 @@ using System.Net;
 
 namespace MobiControlApi
 {
-    public partial class Api : LogAbstraction, ILowLevelApi
+    public partial class Api : LogAbstraction, IWebApi
     {
         private readonly CancellationToken cancellationToken;
         private readonly MobiControlApiConfig config;

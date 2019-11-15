@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -14,5 +14,15 @@
   <ItemGroup>
     <Compile Remove="Class1.cs" />
   </ItemGroup>
-  <Import Project="..\MobiControlApi.Shared\MobiControlApi.Shared.projitems" Label="Shared" Condition="Exists('..\MobiControlApi.Shared\MobiControlApi.Shared.projitems')" />
+  <ItemGroup>
+    <None Remove="MobiControlServerApiConfig_Template.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="MobiControlServerApiConfig_Template.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Util\" />
+  </ItemGroup>
 </Project>
