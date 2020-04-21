@@ -48,18 +48,9 @@ namespace MobiControlApi.Devices
         {
             List<CollectedDataModel> collectedDateModels;
 
-
-
-            // /collectedData?startDate=2019-11-01T00%3A00%3A00-02%3A00&endDate=2019-12-01T00%3A00%3A00-02%3A00&builtInDataType=BatteryStatus
-
             string resourcePath = "devices/" + deviceId + "/collectedData?" + Helpers.GetUrlStartStop(startDate, stopDate) + "&builtInDataType=" + builtInDataType + "&customDataType=" + customDataType;
 
             collectedDateModels = await GetObjectListFromWebApi.GetObjectListFromSotiAsync<CollectedDataModel>(webApi, resourcePath);
-
-            // Call WebAPi GetJsonAsync
-            var responseJson =  await webApi.GetJsonAsync(resourcePath);
-
-           
 
             return collectedDateModels;
         }
@@ -71,14 +62,33 @@ namespace MobiControlApi.Devices
         // GET /devices/collectedData
         // Retrieve Collected Data in Bulk
 
-        public static async Task<List<CollectedDataModel>> GetCollectedDataAsync()
+        public static async Task<List<CollectedDataModel>> GetCollectedDataAsync(IWebApi webApi, string deviceGroupPath, DateTimeOffset startDate, DateTimeOffset stopDate, string builtInDataType, string customDataType)
         {
-            List<CollectedDataModel> collectedDateModels = new List<CollectedDataModel>();
+            List<CollectedDataModel> collectedDateModels;
 
+            string resourcePath = "devices/collectedData?" + Helpers.GetUrlStartStop(startDate, stopDate);
 
+            if (!String.IsNullOrWhiteSpace(deviceGroupPath))
+            {
+                resourcePath += "&path=" + deviceGroupPath;
+            }
+
+            if (!String.IsNullOrWhiteSpace(builtInDataType))
+            {
+                resourcePath += "&builtInDataType=" + builtInDataType;
+            }
+
+            if (!String.IsNullOrWhiteSpace(customDataType))
+            {
+                resourcePath += "&customDataType=" + customDataType;
+            }
+
+            // Get data from web API
+            collectedDateModels = await GetObjectListFromWebApi.GetObjectListFromSotiAsync<CollectedDataModel>(webApi, resourcePath);
 
             return collectedDateModels;
         }
+
 
 
     }
