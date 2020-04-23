@@ -30,7 +30,7 @@ namespace MobiControlApi
         // Get list of devices
         public async Task<List<Device>> GetCacheDeviceListAsync(string deviceGroupPath, bool includeSubgroups)
         {
-            List<Device> returnList;
+            List<Device> returnList = null;
 
             // Check cache validity
             await CheckCacheValidity();
@@ -38,21 +38,27 @@ namespace MobiControlApi
             // Make sure deviceGroupPath match value returned by SOTI API
             deviceGroupPath = deviceGroupPath.TrimStart('/').Replace('/','\\');
 
-            // Do we need to include devices in sub groups
-            if(!includeSubgroups)
+            // If listCacheDevices is not null
+            if (listCacheDevices != null)
             {
-                // No sub group
-                returnList = listCacheDevices
-                    .Where((d) => d.Path.TrimStart('\\') == deviceGroupPath)
-                    .ToList();
+                // Do we need to include devices in sub groups
+                if (!includeSubgroups)
+                {
+                    // No sub group
+                    returnList = listCacheDevices
+                        .Where((d) => d.Path.TrimStart('\\') == deviceGroupPath)
+                        .ToList();
+                }
+                else
+                {
+                    // Include devices in sub group
+                    returnList = listCacheDevices
+                        .Where((d) => d.Path.TrimStart('\\').StartsWith(deviceGroupPath, true, System.Globalization.CultureInfo.InvariantCulture))
+                        .ToList();
+                }
             }
             else
-            {
-                // Include devices in sub group
-                returnList = listCacheDevices
-                    .Where((d) => d.Path.TrimStart('\\').StartsWith(deviceGroupPath, true, System.Globalization.CultureInfo.InvariantCulture))
-                    .ToList();
-            }
+                returnList = new List<Device>();
 
             return returnList;
         }
