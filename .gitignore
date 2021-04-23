@@ -331,3 +331,4 @@ ASALocalRun/
 .DS_Store
 MobiControlApi.Shared/MobiControlServerApiConfig.json
 MobiControlApi.NunitTest/test data/TestPackage/built/TestPackage.pcg
+MobiControlApi.Lib/MobiControlServerApiConfig.json
