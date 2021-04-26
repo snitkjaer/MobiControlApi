@@ -181,7 +181,7 @@ namespace MobiControlApi
         public object DeviceFirmwareUpgrade { get; set; }
 
         [JsonProperty("BuildSecurityPatch", NullValueHandling = NullValueHandling.Ignore)]
-        public DateTimeOffset? BuildSecurityPatch { get; set; }
+        public string BuildSecurityPatch { get; set; }
 
         [JsonProperty("Kind", NullValueHandling = NullValueHandling.Ignore)]
         public string Kind { get; set; }

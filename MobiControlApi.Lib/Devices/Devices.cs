@@ -28,7 +28,7 @@ namespace MobiControlApi
         }
 
         // Get device list for specific group using /device/search MC 14+ API (reads elasticsearch DB)
-        private async Task<string> GetDeviceListJsonSearchDbAsync(string deviceGroupPath, string filter, bool includeSubgroups, bool verifyAndSync, int skip, int take)
+        public async Task<string> GetDeviceListJsonSearchDbAsync(string deviceGroupPath, string filter, bool includeSubgroups, bool verifyAndSync, int skip, int take)
         {
 
             // Generate resourcePath
@@ -130,7 +130,70 @@ namespace MobiControlApi
 
 
         // Get list of devices
-        private async Task<List<Device>> GetDeviceListFromSotiAsync(string deviceGroupPath, bool includeSubgroups)
+        public async Task<List<Device>> GetDeviceListFromSotiAsync(string deviceGroupPath, bool includeSubgroups)
+        {
+
+            System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
+
+            List<Device> listDevices = new List<Device>();
+
+
+            string resultJson = null;
+
+            try
+            {
+                stopWatch.Start();
+
+                // Get devices
+                resultJson = await GetDeviceListJsonSearchDbAsync("/", null, true, false, 0, 1000);
+
+
+                // If we got a result - parse it
+                if (resultJson != null)
+                {
+                    // String to json array
+                    JArray devices = JArray.Parse(resultJson);
+
+                    // Itterate over device found
+                    foreach (JObject deviceJson in devices)
+                    {
+
+                        // parse device
+                        Device device = ParseDeviceJson(deviceJson.ToString());
+
+                        if (device != null)
+                            listDevices.Add(device);
+                    }
+                }
+
+                // Stop
+                stopWatch.Stop();
+
+
+                var properties = new Dictionary<string, string>
+                             {
+                                 { "GroupPath", deviceGroupPath },
+                                 { "CurrentDeviceCount",listDevices.Count.ToString()}
+                             };
+                TrackEvent("SotiGetGroupDeviceList", stopWatch.Elapsed, properties);
+
+            }
+            catch (Exception ex)
+            {
+                // Stop
+                stopWatch.Stop();
+
+                Log("Exception getting device list for '" + deviceGroupPath + "' in " + stopWatch.Elapsed.ToString(), SeverityLevel.Error);
+                TrackException(ex);
+            }
+
+
+            return listDevices;
+        }
+
+
+        // Get list of devices
+        public async Task<List<Device>> OldGetDeviceListFromSotiAsync(string deviceGroupPath, bool includeSubgroups)
         {
 
                 System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
@@ -164,8 +227,9 @@ namespace MobiControlApi
                             // Itterate over device found
                             foreach (JObject deviceJson in devices)
                             {
+
                                 // parse device
-                                Device device = Device.FromJson(deviceJson.ToString());
+                                Device device = ParseDeviceJson(deviceJson.ToString());
 
                                 if (device != null)
                                     listDevices.Add(device);
@@ -203,8 +267,26 @@ namespace MobiControlApi
                     Log("Exception getting device list for '" + deviceGroupPath + "' in " + stopWatch.Elapsed.ToString(), SeverityLevel.Error);
                     TrackException(ex);
                 }                return listDevices;
+        }
 
 
+        public Device ParseDeviceJson(string deviceJson)
+        {
+            Device device = null;
+
+            try
+            {
+                if (!String.IsNullOrWhiteSpace(deviceJson))
+                    device = Device.FromJson(deviceJson);
+            }
+            catch (Exception ex)
+            {
+                TrackException(ex);
+                Log("Exception parsing device json '" + deviceJson, SeverityLevel.Error);
+            }
+
+
+            return device;
         }
 
 
@@ -218,17 +300,7 @@ namespace MobiControlApi
 
             string jsonDevice = await GetJsonAsync(resourcePath);
 
-            Device device = null;
-
-            try
-            {
-                if (!String.IsNullOrWhiteSpace(jsonDevice))
-                    device = Device.FromJson(jsonDevice);
-            }
-            catch(Exception ex)
-            {
-                TrackException(ex);
-            }
+            Device device = ParseDeviceJson(jsonDevice);
 
             if(device != null)
             {
