@@ -48,10 +48,12 @@ namespace MobiControlApi
             string resourcePath = "devices/search?";
 
             // groupPath
-            if (String.IsNullOrEmpty(deviceGroupPath) || deviceGroupPath == "/")
+            // remove any leading forward slashes
+            deviceGroupPath = deviceGroupPath.TrimStart('/');
+            if (String.IsNullOrEmpty(deviceGroupPath))
                 resourcePath += "";
             else
-                resourcePath += "&groupPath=" + EncodeUrl(deviceGroupPath);
+                resourcePath += "&groupPath=" + EncodeUrl("//" + deviceGroupPath);
 
             // filter
             if (!String.IsNullOrEmpty(filter))
@@ -71,7 +73,7 @@ namespace MobiControlApi
 
         public string EncodeUrl(string url)
         {
-            return url.Replace("/", "%255C%255C").Replace(" ", "%2520");
+            return url.Replace("/", "%255C").Replace(" ", "%2520");
         }
 
 
