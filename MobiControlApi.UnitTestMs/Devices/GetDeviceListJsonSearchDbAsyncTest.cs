@@ -28,7 +28,7 @@ namespace MobiControlApi.UnitTestMs.Devices
 
             #region Assert
             int noDevices = Regex.Matches(responseJosn, "DeviceId").Count;
-            Assert.IsTrue(noDevices == 355);
+            Assert.AreEqual(TestData.rootdeviceCount, noDevices);
             #endregion
         }
 
@@ -42,13 +42,13 @@ namespace MobiControlApi.UnitTestMs.Devices
             #endregion
 
             #region Act
-            String responseJosn = await mcApi.GetDeviceListJsonSearchDbAsync("/Test", null, true, false, 0, 1000);
+            String responseJosn = await mcApi.GetDeviceListJsonSearchDbAsync(TestData.groupName, null, true, false, 0, 1000);
 
             #endregion
 
             #region Assert
             int noDevices = Regex.Matches(responseJosn, "DeviceId").Count;
-            Assert.IsTrue(noDevices == 224);
+            Assert.AreEqual(TestData.gropedeviceCount, noDevices);
             #endregion
         }
     }

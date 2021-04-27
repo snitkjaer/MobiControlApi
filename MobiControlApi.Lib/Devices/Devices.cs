@@ -166,7 +166,7 @@ namespace MobiControlApi
                 stopWatch.Start();
 
                 // Get devices
-                resultJson = await GetDeviceListJsonSearchDbAsync("/", null, true, false, 0, 1000);
+                resultJson = await GetDeviceListJsonSearchDbAsync(deviceGroupPath, null, includeSubgroups, false, 0, 1000);
 
 
                 // If we got a result - parse it
