@@ -10,6 +10,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.17.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
+    <PackageReference Include="ConsoleTables" Version="2.4.2" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Class1.cs" />

@@ -14,7 +14,7 @@ namespace MobiControlApi.UnitTestMs.Devices
         static MobiControlApiConfig mobiControlApiConfig = MobiControlApiConfig.GetConfigFromJsonFile("MobiControlServerApiConfig.json");
 
         [TestMethod]
-        public async Task GetDeviceListJsonSearchDbAsyncTest_Count()
+        public async Task GetDeviceListJsonSearchDbAsyncTest_CountRoot()
         {
             #region Arrange
             Api mcApi = new Api(mobiControlApiConfig, null, token);
@@ -29,6 +29,26 @@ namespace MobiControlApi.UnitTestMs.Devices
             #region Assert
             int noDevices = Regex.Matches(responseJosn, "DeviceId").Count;
             Assert.IsTrue(noDevices == 355);
+            #endregion
+        }
+
+
+        [TestMethod]
+        public async Task GetDeviceListJsonSearchDbAsyncTest_CountSub()
+        {
+            #region Arrange
+            Api mcApi = new Api(mobiControlApiConfig, null, token);
+
+            #endregion
+
+            #region Act
+            String responseJosn = await mcApi.GetDeviceListJsonSearchDbAsync("/Test", null, true, false, 0, 1000);
+
+            #endregion
+
+            #region Assert
+            int noDevices = Regex.Matches(responseJosn, "DeviceId").Count;
+            Assert.IsTrue(noDevices == 224);
             #endregion
         }
     }

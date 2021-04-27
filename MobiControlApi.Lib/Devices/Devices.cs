@@ -13,7 +13,7 @@ namespace MobiControlApi
         // Get device list for specific group using /device MC 13+ API (reads directly from SOTI SQL DB)
         private async Task<string> GetDeviceListJsonFromSotiDbAsync(string deviceGroupPath, int skip, int take)
         {
-            deviceGroupPath = deviceGroupPath.Replace(" ", "%2520").Replace("/", "%255C");
+            deviceGroupPath = EncodeUrl(deviceGroupPath);
 
             // Generate resourcePath
             string resourcePath = "devices?path=%255C" + deviceGroupPath; // "MARK%255CZebra%2520TC56";
@@ -32,25 +32,46 @@ namespace MobiControlApi
         {
 
             // Generate resourcePath
-            //string resourcePath = "devices/search?path=%255C" + deviceGroupPath.Replace(" ", "%2520").Replace("/", "%255C");
-
-            string resourcePath = "devices/search?path=" + deviceGroupPath;
-
-            if (!String.IsNullOrEmpty(filter))
-                resourcePath += "&filter=" + filter.Replace(" ", "%2520").Replace("/", "%255C");
-
-            // if (includeSubgroups)
-
-            resourcePath += "&includeSubgroups=" + includeSubgroups.ToString().ToLower();
-
-            resourcePath +=
-                "&skip=" + skip.ToString()
-                + "&take=" + take.ToString();
+            string resourcePath = GenerateSeachDbResourcePath(deviceGroupPath, filter, includeSubgroups, verifyAndSync, skip, take);
 
             // Call GetJsonAsync
             return await GetJsonAsync(resourcePath);
 
 
+        }
+
+        // devices/search?&includeSubgroups=true&skip=0&take=1000"
+        // devices/search?groupPath=%255C%255CTest&includeSubgroups=true&skip=0&take=1000"
+        public string GenerateSeachDbResourcePath(string deviceGroupPath, string filter, bool includeSubgroups, bool verifyAndSync, int skip, int take)
+        {
+            // search db
+            string resourcePath = "devices/search?";
+
+            // groupPath
+            if (String.IsNullOrEmpty(deviceGroupPath) || deviceGroupPath == "/")
+                resourcePath += "";
+            else
+                resourcePath += "&groupPath=" + EncodeUrl(deviceGroupPath);
+
+            // filter
+            if (!String.IsNullOrEmpty(filter))
+                resourcePath += "&filter=" + EncodeUrl(filter);
+
+            // includeSubgroups
+            resourcePath += "&includeSubgroups=" + includeSubgroups.ToString().ToLower();
+
+            // skip & take
+            resourcePath +=
+                "&skip=" + skip.ToString()
+                + "&take=" + take.ToString();
+
+
+            return resourcePath;
+        }
+
+        public string EncodeUrl(string url)
+        {
+            return url.Replace("/", "%255C%255C").Replace(" ", "%2520");
         }
 
 

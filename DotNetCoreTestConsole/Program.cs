@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MobiControlApi;
+using ConsoleTables;
 
 namespace DotNetCoreTestConsole
 {
@@ -29,17 +31,24 @@ namespace DotNetCoreTestConsole
                 Api mcApi = new Api(mobiControlApiConfig, null, cts.Token);
 
 
-                while(true)
+                List<BasicDevice> devices = await mcApi.GetBasicDeviceListJsonSearchDbAsync("/", null, true, false, 0, 1000);
+
+                Console.WriteLine("Got " + devices.Count + " devices from SOTI");
+
+
+                // Display result
+                var consoleTable = new ConsoleTable("Name", "ID", "IMEI", "Path");
+                foreach (var device in devices)
                 {
-                    // Get device groups json
-                    string resultJson = await mcApi.GetJsonAsync("devicegroups");
-                    Console.Write(resultJson);
-
-                    Thread.Sleep(1000);
+                    consoleTable.AddRow(device.DeviceName, device.DeviceId, device.ImeiMeidEsn, device.Path);
                 }
+                consoleTable.Write();
 
 
-			}
+                Console.ReadLine();
+
+
+            }
 			catch (Exception ex)
             {
                 Console.Write(ex.ToString());
