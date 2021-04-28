@@ -159,5 +159,10 @@ namespace MobiControlApi
         {
             return await mcApi.GetDeviceListAsync(monitorSotiGroupConfig.FolderPath, monitorSotiGroupConfig.IncludeSubFolders);
         }
+
+        public async Task<List<BasicDevice>> GetBasicDeviceListAsync(Api mcApi)
+        {
+            return await mcApi.GetBasicDeviceListFromSotiAsync(monitorSotiGroupConfig.FolderPath, monitorSotiGroupConfig.IncludeSubFolders);
+        }
     }
 }

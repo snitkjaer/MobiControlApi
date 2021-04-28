@@ -42,6 +42,51 @@ namespace MobiControlApi
 
         }
 
+
+        // Get list of devices
+        public async Task<List<BasicDevice>> GetBasicDeviceListFromSotiAsync(string deviceGroupPath, bool includeSubgroups)
+        {
+
+            System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
+
+            List<BasicDevice> listDevices = new List<BasicDevice>();
+
+
+            try
+            {
+                stopWatch.Start();
+
+                // Get devices
+                listDevices = await GetBasicDeviceListJsonSearchDbAsync(deviceGroupPath, null, includeSubgroups, false, 0, 1000);
+
+
+                // Stop
+                stopWatch.Stop();
+
+
+                var properties = new Dictionary<string, string>
+                             {
+                                 { "GroupPath", deviceGroupPath },
+                                 { "CurrentDeviceCount",listDevices.Count.ToString()}
+                             };
+                TrackEvent("SotiGetGroupDeviceList", stopWatch.Elapsed, properties);
+
+            }
+            catch (Exception ex)
+            {
+                // Stop
+                stopWatch.Stop();
+
+                Log("Exception getting basic device list for '" + deviceGroupPath + "' in " + stopWatch.Elapsed.ToString(), SeverityLevel.Error);
+                TrackException(ex);
+            }
+
+
+            return listDevices;
+
+        }
+
+
         public BasicDevice ParseBasicDeviceJson(string deviceJson)
         {
             BasicDevice basicDevice = null;
