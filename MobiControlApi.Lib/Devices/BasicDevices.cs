@@ -61,5 +61,25 @@ namespace MobiControlApi
             return basicDevice;
         }
 
+        // Get basic device
+        public async Task<BasicDevice> GetBasicDeviceAsync(string deviceId)
+        {
+            // GET /devices/{deviceId}
+
+            // Generate resourcePath
+            string resourcePath = "devices/" + deviceId;
+
+            string jsonDevice = await GetJsonAsync(resourcePath);
+
+            BasicDevice device = ParseBasicDeviceJson(jsonDevice);
+
+            if (device != null)
+            {
+                Log("DeviceId " + deviceId + " was found", SeverityLevel.Verbose);
+            }
+
+            return device;
+        }
+
     }
 }
