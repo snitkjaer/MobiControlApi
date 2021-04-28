@@ -9,7 +9,7 @@ using System.Net.Http;
 namespace MobiControlApi.UnitTestMs.Devices
 {
     [TestClass]
-    public class GetBasicDeviceListJsonSearchDbAsyncTest
+    public class GetDeviceIdListAsyncTest
     {
         static CancellationToken token;
         static MobiControlApiConfig mobiControlApiConfig = MobiControlApiConfig.GetConfigFromJsonFile("MobiControlServerApiConfig.json");
@@ -17,19 +17,17 @@ namespace MobiControlApi.UnitTestMs.Devices
 
         [DataTestMethod]
         [DataRow("/", true)]
-        [DataRow("//", true)]
-        [DataRow("", true)]
         [DataRow(TestData.groupName, true)]
-        public async Task GetBasicDeviceListJsonSearchDbAsyncTest_CountRoot(string groupPath, bool includeSubGroups)
+        public async Task GetBasicDeviceListJsonSearchDbAsyncTest_Count(string groupPath, bool includeSubGroups)
         {
             #region Arrange
             Api mcApi = new Api(mobiControlApiConfig, null, token, httpClient);
-            String responseJson = await mcApi.GetDeviceListJsonSearchDbAsync(groupPath, null, includeSubGroups, false, 0, 1000);
+            String responseJson = await mcApi.GetDeviceListJsonSearchDbAsync(groupPath, null, true, false, 0, 1000);
             int noDevices = Regex.Matches(responseJson, "DeviceId").Count;
             #endregion
 
             #region Act
-            List<BasicDevice> devices = await mcApi.GetBasicDeviceListJsonSearchDbAsync(groupPath, null, includeSubGroups, false, 0, 1000);
+            List<string> devices = await mcApi.GetDeviceIdListAsync(groupPath, includeSubGroups);
             #endregion
 
             #region Assert

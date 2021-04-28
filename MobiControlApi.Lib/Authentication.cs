@@ -29,15 +29,13 @@ namespace MobiControlApi
 		string grant_type;
 	    string Token;
 		DateTime? TokenExpireTime;
-        public TimeSpan httpTimeout = new TimeSpan(0, 0, 20);
-
-        // HttpClient used for authentication requests
-        private static readonly HttpClient httpClient = new HttpClient();
+        private readonly HttpClient httpClient;
 
         // Constructor
-		public Authentication(MobiControlApiConfig config, CancellationToken cancellationToken)
+        public Authentication(MobiControlApiConfig config, CancellationToken cancellationToken, HttpClient httpClient)
         {
             this.cancellationToken = cancellationToken;
+            this.httpClient = httpClient;
 
             this.baseUri = new Uri("https://" + config.FQDN);
            
@@ -47,7 +45,7 @@ namespace MobiControlApi
             //grant_type=password&username=Administrator&password=1
             grant_type = "grant_type=password&username=" + config.Username + "&password=" + config.Password;
 
-            httpClient.Timeout = httpTimeout;
+
 
 
         }

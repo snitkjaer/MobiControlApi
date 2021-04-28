@@ -77,19 +77,6 @@ namespace MobiControlApi
         }
 
 
-        // Get list of device id's
-        public async Task<List<string>> GetDeviceIdListAsync(string deviceGroupPath, bool includeSubgroups)
-        {
-
-            // Update listCacheDevices if needed
-            List<Device> deviceList = await GetCacheDeviceListAsync(deviceGroupPath, includeSubgroups);
-            List<string> deviceIdList = deviceList
-                .Select((arg) => arg.DeviceId)
-                .ToList();
-
-            return deviceIdList;
-
-        }
 
         /*
 

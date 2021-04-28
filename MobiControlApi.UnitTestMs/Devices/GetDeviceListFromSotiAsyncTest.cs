@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Net.Http;
 
 namespace MobiControlApi.UnitTestMs.Devices
 {
@@ -12,18 +13,21 @@ namespace MobiControlApi.UnitTestMs.Devices
     {
         static CancellationToken token;
         static MobiControlApiConfig mobiControlApiConfig = MobiControlApiConfig.GetConfigFromJsonFile("MobiControlServerApiConfig.json");
+        HttpClient httpClient = new HttpClient();
 
-        [TestMethod]
-        public async Task GetDeviceListJsonSearchDbAsyncTest_CountRoot()
+        [DataTestMethod]
+        [DataRow("/", true)]
+        [DataRow(TestData.groupName, true)]
+        public async Task GetDeviceListJsonSearchDbAsyncTest_Count(string groupPath, bool includeSubGroups)
         {
             #region Arrange
-            Api mcApi = new Api(mobiControlApiConfig, null, token);
-            String responseJosn = await mcApi.GetDeviceListJsonSearchDbAsync("/", null, true, false, 0, 1000);
+            Api mcApi = new Api(mobiControlApiConfig, null, token, httpClient);
+            String responseJosn = await mcApi.GetDeviceListJsonSearchDbAsync(groupPath, null, includeSubGroups, false, 0, 1000);
             int noDevices = Regex.Matches(responseJosn, "DeviceId").Count;
             #endregion
 
             #region Act
-            List<Device> devices= await mcApi.GetDeviceListFromSotiAsync("/", true);
+            List<Device> devices= await mcApi.GetDeviceListFromSotiAsync(groupPath, includeSubGroups);
 
             #endregion
 
@@ -32,23 +36,5 @@ namespace MobiControlApi.UnitTestMs.Devices
             #endregion
         }
 
-        [TestMethod]
-        public async Task GetDeviceListJsonSearchDbAsyncTest_CountSub()
-        {
-            #region Arrange
-            Api mcApi = new Api(mobiControlApiConfig, null, token);
-            String responseJosn = await mcApi.GetDeviceListJsonSearchDbAsync(TestData.groupName, null, true, false, 0, 1000);
-            int noDevices = Regex.Matches(responseJosn, "DeviceId").Count;
-            #endregion
-
-            #region Act
-            List<Device> devices = await mcApi.GetDeviceListFromSotiAsync(TestData.groupName, true);
-
-            #endregion
-
-            #region Assert
-            Assert.AreEqual(noDevices, devices.Count);
-            #endregion
-        }
     }
 }

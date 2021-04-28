@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.DataContracts;
+using System.Net.Http;
 
 namespace MobiControlApi
 {
@@ -21,6 +22,7 @@ namespace MobiControlApi
          * 
         */
         CancellationToken token;
+        private readonly HttpClient httpClient;
 
         // Configuration input
         private MobiControlApiConfig MobiControlApiConfig;
@@ -31,9 +33,10 @@ namespace MobiControlApi
         public List<MonitorSotiFolder> listMonitorSotiFolder;
 
         // Constructor
-        public MonitorSotiFolders(MobiControlApiConfig mobiControlApiConfig, List<MonitorSotiFolderConfig> listMonitorSotiFolderConfig, TelemetryClient tc, CancellationToken token)
+        public MonitorSotiFolders(MobiControlApiConfig mobiControlApiConfig, List<MonitorSotiFolderConfig> listMonitorSotiFolderConfig, TelemetryClient tc, CancellationToken token, HttpClient httpClient)
         {
             this.token = token;
+            this.httpClient = httpClient;
             this.tc = tc;
             this.listMonitorSotiFolderConfig = listMonitorSotiFolderConfig;
             this.MobiControlApiConfig = mobiControlApiConfig;
@@ -53,7 +56,7 @@ namespace MobiControlApi
             }
 
             // Validate connnection to the MC server
-            mcApi = new Api(mobiControlApiConfig, tc, token);
+            //mcApi = new Api(mobiControlApiConfig, tc, token, httpClientFactory);
 
         }
 
@@ -74,7 +77,7 @@ namespace MobiControlApi
                 if (mcApi == null)
                 {
                     // Validate connnection to the MC server
-                    mcApi = new Api(MobiControlApiConfig, tc, token);
+                    mcApi = new Api(MobiControlApiConfig, tc, token, httpClient);
 
                 }
 
@@ -108,7 +111,7 @@ namespace MobiControlApi
             {
                 if (mcApi == null)
                     // Validate connnection to the MC server
-                    mcApi = new Api(MobiControlApiConfig, tc, token);
+                    mcApi = new Api(MobiControlApiConfig, tc, token, httpClient);
 
                 // Itterate over monitored groups and return device list
                 foreach (var group in listMonitorSotiFolder)
@@ -137,7 +140,7 @@ namespace MobiControlApi
             {
                 if (mcApi == null)
                     // Validate connnection to the MC server
-                    mcApi = new Api(MobiControlApiConfig, tc, token);
+                    mcApi = new Api(MobiControlApiConfig, tc, token, httpClient);
 
                 // Itterate over monitored groups and return device dict
                 foreach (var group in listMonitorSotiFolder)

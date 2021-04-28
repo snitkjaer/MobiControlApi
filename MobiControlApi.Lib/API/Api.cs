@@ -19,11 +19,9 @@ namespace MobiControlApi
         private readonly CancellationToken cancellationToken;
         private readonly MobiControlApiConfig config;
 
-        internal static HttpClient httpClientInstance;
+        private readonly HttpClient httpClientInstance;
 
         private readonly Authentication authentication;
-
-        private static TimeSpan httpTimeout = new TimeSpan(0, 0, 20);  // 20 sec
 
         // SOTI API can accecss device from either the search DB og the traditional DB
         public bool useSearchDbToGetDevices = true;
@@ -31,18 +29,18 @@ namespace MobiControlApi
         // 
 
         // Main constructor
-        public Api(MobiControlApiConfig mobiControlApiConfig, TelemetryClient tc, CancellationToken ct)
+        public Api(MobiControlApiConfig mobiControlApiConfig, TelemetryClient tc, CancellationToken cancellationToken, HttpClient httpClient)
         {
+            // Save
             this.tc = tc;
+            this.httpClientInstance = httpClient;
+            this.cancellationToken = cancellationToken;
 
             // Create config object
             config = mobiControlApiConfig;
 
-            // Save CancellationToken
-            cancellationToken = ct;
-
             // Create SOTI Authentication object
-            authentication = new Authentication(config, cancellationToken);
+            authentication = new Authentication(config, cancellationToken, httpClient);
 
             // Initiate the HTTP Client
             Init_httpClient();
@@ -52,10 +50,7 @@ namespace MobiControlApi
 
         protected void Init_httpClient()
         {
-
-            httpClientInstance = new HttpClient();
             httpClientInstance.BaseAddress = config.baseUri;
-            httpClientInstance.Timeout = httpTimeout;
             httpClientInstance.DefaultRequestHeaders.Clear();
             httpClientInstance.DefaultRequestHeaders.ConnectionClose = false;
             ServicePointManager.FindServicePoint(config.baseUri).ConnectionLeaseTimeout = 60 * 1000;
@@ -65,22 +60,23 @@ namespace MobiControlApi
         //
         // Alternative constructor overloads
         //
-        public Api(string FQDN, string ClientId, string ClientSecret, string Username, string Password, TelemetryClient tc, CancellationToken ct)
-            : this(new MobiControlApiConfig(FQDN, ClientId, ClientSecret, Username, Password), tc, ct)
+        /*
+        public Api(string FQDN, string ClientId, string ClientSecret, string Username, string Password, TelemetryClient tc, CancellationToken ct, IHttpClientFactory httpClientInstance)
+            : this(new MobiControlApiConfig(FQDN, ClientId, ClientSecret, Username, Password), tc, ct, httpClientInstance)
         { }
 
-        public Api(string FQDN, string ClientId, string ClientSecret, string Username, string Password, CancellationToken ct)
-            : this(new MobiControlApiConfig(FQDN, ClientId, ClientSecret, Username, Password), null, ct)
+        public Api(string FQDN, string ClientId, string ClientSecret, string Username, string Password, CancellationToken ct, IHttpClientFactory httpClientInstance)
+            : this(new MobiControlApiConfig(FQDN, ClientId, ClientSecret, Username, Password), null, ct, httpClientInstance)
         { }
 
-        public Api(JObject jsonConfig, TelemetryClient tc, CancellationToken ct)
-            : this(MobiControlApiConfig.GetConfigFromJObject(jsonConfig), tc, ct)
+        public Api(JObject jsonConfig, TelemetryClient tc, CancellationToken ct, IHttpClientFactory httpClientInstance)
+            : this(MobiControlApiConfig.GetConfigFromJObject(jsonConfig), tc, ct, httpClientInstance)
         { }
 
-        public Api(string jsonConfig, TelemetryClient tc, CancellationToken ct)
-            : this(MobiControlApiConfig.GetConfigFromJsonString(jsonConfig), tc, ct)
+        public Api(string jsonConfig, TelemetryClient tc, CancellationToken ct, IHttpClientFactory httpClientInstance)
+            : this(MobiControlApiConfig.GetConfigFromJsonString(jsonConfig), tc, ct, httpClientInstance)
         { }
-
+        */
         List<Task> listTask = new List<Task>();
 
         public async Task StartMonitor()
