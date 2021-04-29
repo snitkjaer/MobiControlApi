@@ -73,7 +73,12 @@ namespace MobiControlApi
 
         public string EncodeUrl(string url)
         {
-            return url.Replace("/", "%255C").Replace(" ", "%2520");
+            return url
+                .Replace("/", "%255C")
+                .Replace(" ", "%2520")
+                .Replace("=", "%3D")
+                .Replace("\"", "%2527")
+                ;
         }
 
 

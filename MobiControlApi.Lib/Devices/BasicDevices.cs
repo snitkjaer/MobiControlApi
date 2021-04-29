@@ -106,7 +106,7 @@ namespace MobiControlApi
             return basicDevice;
         }
 
-        // Get basic device
+        // Get basic device on device id
         public async Task<BasicDevice> GetBasicDeviceAsync(string deviceId)
         {
             // GET /devices/{deviceId}
@@ -124,6 +124,28 @@ namespace MobiControlApi
             }
 
             return device;
+        }
+
+        // Get basic device on imei
+        public async Task<BasicDevice> GetBasicDeviceOnImeiAsync(string deviceImei)
+        {
+            // GET search=IMEI_MEID_ESN%20Equal%20"353857081861581"&subGroups=true&count=250
+            BasicDevice basicDevice = null;
+
+
+            if(!String.IsNullOrWhiteSpace(deviceImei))
+            {
+                var devices = await GetBasicDeviceListJsonSearchDbAsync("/", "IMEI_MEID_ESN=\"" + deviceImei + "\"", true, false, 0, 1);
+                if(devices.Count == 1)
+                    basicDevice = devices.First();
+
+                if (basicDevice == null)
+                {
+                    Log("Device Imei " + deviceImei + " was not found", SeverityLevel.Warning);
+                }
+            }
+
+            return basicDevice;
         }
 
     }
