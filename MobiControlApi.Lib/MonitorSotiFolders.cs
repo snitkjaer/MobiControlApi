@@ -156,6 +156,33 @@ namespace MobiControlApi
             return listDevices;
         }
 
+
+        // Get device list for all monitored folders
+        public async Task<List<BasicDevice>> GetBasicDeviceListAsync()
+        {
+            List<BasicDevice> listDevices = new List<BasicDevice>();
+
+            try
+            {
+                if (mcApi == null)
+                    // Validate connnection to the MC server
+                    mcApi = new Api(MobiControlApiConfig, tc, token, httpClient);
+
+                // Itterate over monitored groups and return device dict
+                foreach (var group in listMonitorSotiFolder)
+                {
+                    listDevices.AddRange(await group.GetBasicDeviceListAsync(mcApi));
+                }
+            }
+            catch (Exception ex)
+            {
+                TrackException(ex);
+            }
+
+            return listDevices;
+        }
+
+
         protected void MonitorSotiGroup_RemovedDeviceList(object sender, List<string> listRemovedDeviceIds)
         {
             OnRemovedDeviceList(sender, listRemovedDeviceIds);
