@@ -3,7 +3,7 @@ namespace MobiControlApi.UnitTestMs.Devices
 {
     public static class TestData
     {
-        public const string groupName = "/Steward";
-        public const string deviceImei = "353857081861581";
+        public const string groupName = "/MARK/BUC";
+        public const string deviceImei = "353857080569110";
     }
 }
