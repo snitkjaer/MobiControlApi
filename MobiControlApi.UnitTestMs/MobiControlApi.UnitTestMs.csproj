@@ -27,6 +27,12 @@
     <ProjectReference Include="..\MobiControlApi.Lib\MobiControlApi.Lib.csproj" />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <Content Include="..\MobiControlApi.Lib\MobiControlServerApiConfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  
   <ItemGroup>
     <Folder Include="API\" />
   </ItemGroup>

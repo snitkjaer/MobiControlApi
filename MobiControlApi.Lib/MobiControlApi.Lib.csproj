@@ -16,10 +16,5 @@
   <ItemGroup>
     <None Remove="MobiControlServerApiConfig.json" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <Content Include="MobiControlServerApiConfig.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 </Project>
