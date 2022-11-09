@@ -56,7 +56,12 @@ namespace MobiControlApi
             }
 
             // Validate connnection to the MC server
-            //mcApi = new Api(mobiControlApiConfig, tc, token, httpClientFactory);
+            if (mcApi == null)
+            {
+                // Validate connnection to the MC server
+                mcApi = new Api(MobiControlApiConfig, tc, token, httpClient);
+
+            }
 
         }
 
