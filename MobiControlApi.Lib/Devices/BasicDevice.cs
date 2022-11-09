@@ -17,7 +17,8 @@ namespace MobiControlApi
         [JsonProperty("Path", NullValueHandling = NullValueHandling.Ignore)]
         public string Path { get; set; }
 
-
+        [JsonProperty("IsAgentOnline", NullValueHandling = NullValueHandling.Ignore)]
+        public bool Online { get; set; }
 
         public static BasicDevice FromJson(string json) => JsonConvert.DeserializeObject<BasicDevice>(json, Helpers.Converter.Settings);
     }
