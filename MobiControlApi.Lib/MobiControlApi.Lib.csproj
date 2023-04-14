@@ -14,7 +14,10 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="MobiControlServerApiConfig.json" />
+    <None Remove="Devices\DeviceCertificates\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Devices\DeviceCertificates\" />
   </ItemGroup>
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 </Project>

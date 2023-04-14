@@ -6,6 +6,7 @@ using MobiControlApi;
 using ConsoleTables;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http;
+using MobiControlApi.Devices.DeviceCertificates;
 
 namespace DotNetCoreTestConsole
 {
@@ -37,17 +38,19 @@ namespace DotNetCoreTestConsole
                 // SOTI Server API
                 Api mcApi = new Api(mobiControlApiConfig, null, cts.Token, httpClient);
 
+                BasicDeviceWithCertificatesList basicDevicsWithCerts = new BasicDeviceWithCertificatesList(mcApi);
 
-                List<BasicDevice> devices = await mcApi.GetBasicDeviceListJsonSearchDbAsync("/", null, true, false, 0, 1000);
+                List<BasicDeviceWithCertificates> devices = await basicDevicsWithCerts.GetAllDevicesCertificatesAsync("/", true);
 
                 Console.WriteLine("Got " + devices.Count + " devices from SOTI");
 
 
                 // Display result
-                var consoleTable = new ConsoleTable("Name", "ID", "IMEI", "Path", "Model", "Kind");
-                foreach (var device in devices)
+                var consoleTable = new ConsoleTable("Name", "ID", "IMEI", "Path", "Model", "Kind", "DeviceCertCount");
+                foreach (BasicDeviceWithCertificates dwc in devices)
                 {
-                    consoleTable.AddRow(device.DeviceName, device.DeviceId, device.ImeiMeidEsn, device.Path, device.Model, device.Kind);
+                    var device = dwc.basicDevice;
+                    consoleTable.AddRow(device.DeviceName, device.DeviceId, device.ImeiMeidEsn, device.Path, device.Model, device.Kind, dwc.deviceCertificates.Count);
                 }
                 consoleTable.Write();
 
