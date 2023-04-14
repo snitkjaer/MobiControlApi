@@ -44,10 +44,10 @@ namespace DotNetCoreTestConsole
 
 
                 // Display result
-                var consoleTable = new ConsoleTable("Name", "ID", "IMEI", "Path");
+                var consoleTable = new ConsoleTable("Name", "ID", "IMEI", "Path", "Model", "Kind");
                 foreach (var device in devices)
                 {
-                    consoleTable.AddRow(device.DeviceName, device.DeviceId, device.ImeiMeidEsn, device.Path);
+                    consoleTable.AddRow(device.DeviceName, device.DeviceId, device.ImeiMeidEsn, device.Path, device.Model, device.Kind);
                 }
                 consoleTable.Write();
 

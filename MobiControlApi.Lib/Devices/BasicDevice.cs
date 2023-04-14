@@ -17,6 +17,12 @@ namespace MobiControlApi
         [JsonProperty("Path", NullValueHandling = NullValueHandling.Ignore)]
         public string Path { get; set; }
 
+        [JsonProperty("Model", NullValueHandling = NullValueHandling.Ignore)]
+        public string Model { get; set; }
+
+        [JsonProperty("Kind", NullValueHandling = NullValueHandling.Ignore)]
+        public string Kind { get; set; }
+
         [JsonProperty("IsAgentOnline", NullValueHandling = NullValueHandling.Ignore)]
         public bool Online { get; set; }
 
