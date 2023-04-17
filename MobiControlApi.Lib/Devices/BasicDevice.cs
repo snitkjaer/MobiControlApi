@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
+using MobiControlApi.Devices;
 
 namespace MobiControlApi
 {
@@ -25,6 +27,9 @@ namespace MobiControlApi
 
         [JsonProperty("IsAgentOnline", NullValueHandling = NullValueHandling.Ignore)]
         public bool Online { get; set; }
+
+        [JsonProperty("CustomAttributes", NullValueHandling = NullValueHandling.Ignore)]
+        public List<DeviceCustomAttribute> CustomAttributes { get; set; }
 
         public static BasicDevice FromJson(string json) => JsonConvert.DeserializeObject<BasicDevice>(json, Helpers.Converter.Settings);
     }
