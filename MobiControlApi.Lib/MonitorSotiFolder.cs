@@ -19,6 +19,8 @@ namespace MobiControlApi
         public string FolderPath => monitorSotiGroupConfig.FolderPath;
 
 
+        Timer timerResetKnownDeviceIdsAtSchedule;
+
         // Known device Dictionary
         public List<string> listKnownDeviceIds { get; private set; }
 
@@ -69,6 +71,11 @@ namespace MobiControlApi
                 Log("Scanning SOTI folder '" + monitorSotiGroupConfig.FolderPath + "' including sub folders every " + monitorSotiGroupConfig.tsInterval.ToString(), SeverityLevel.Information);
             else
                 Log("Scanning SOTI folder '" + monitorSotiGroupConfig.FolderPath + "' every " + monitorSotiGroupConfig.tsInterval.ToString(), SeverityLevel.Information);
+
+            // If RescanTime defined - setup reset deivce id's timer
+            if (!String.IsNullOrWhiteSpace(monitorSotiGroupConfig.RescanTime))
+                ResetKnownDeviceIdsAtSchedule(monitorSotiGroupConfig.dtRescanTime.Hour, monitorSotiGroupConfig.dtRescanTime.Minute);
+            
 
             // Start monitoring loop
             while (!token.IsCancellationRequested)
@@ -138,14 +145,18 @@ namespace MobiControlApi
 
             }
 
+            // Kill the reset deivce id's timer
+            if(timerResetKnownDeviceIdsAtSchedule != null)
+                timerResetKnownDeviceIdsAtSchedule.Dispose();
 
             return 0;
         }
 
+        // Reset the known device id's - on next scan all devices will be seen as new.
         public async Task ResetKnownDeviceIds()
         {
             // Make sure listKnownDeviceIds is only accessed from one place
-            await semaphoreKnowDevices.WaitAsync(); // Wait for the semaphore to become available
+            await semaphoreKnowDevices.WaitAsync();
 
             // Reset know devices id list
             listKnownDeviceIds = new List<string>();
@@ -153,6 +164,23 @@ namespace MobiControlApi
             // Release the semaphore
             semaphoreKnowDevices.Release(); 
         }
+
+        // Schedule a timer
+        public void ResetKnownDeviceIdsAtSchedule(Int32 hour, Int32 min)
+        {
+            // Calculate the time until the next hour / min
+            DateTime now = DateTime.Now;
+            DateTime nextOneAM = now.AddDays(1).Date.AddHours(hour).AddMinutes(min);
+            TimeSpan delay = nextOneAM - now;
+
+            timerResetKnownDeviceIdsAtSchedule = new Timer(ResetKnownDeviceIdsAtSchedule_TimerCallback, null, delay, TimeSpan.FromHours(24)); // set the timer to tick every 24 hours
+        }
+
+        private async void ResetKnownDeviceIdsAtSchedule_TimerCallback(Object o)
+        {
+            await ResetKnownDeviceIds();
+        }
+
 
 
         // Diff 

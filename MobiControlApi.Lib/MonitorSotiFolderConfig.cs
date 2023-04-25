@@ -8,19 +8,13 @@ namespace MobiControlApi
     public class MonitorSotiFolderConfig
     {
         public string FolderPath;
-        string Interval;
         public bool IncludeSubFolders = false;
+        public string Interval;
+        public string RescanTime = "";
 
-        public MonitorSotiFolderConfig(string folderPath, string interval, bool includeSubFolders)
-        {
-            FolderPath = folderPath;
-            Interval = interval;
-            IncludeSubFolders = includeSubFolders;
-        }
 
+        public DateTime dtRescanTime => XmlConvert.ToDateTime(RescanTime, "HH:mm");
         public TimeSpan tsInterval => XmlConvert.ToTimeSpan(Interval);
-
-
 
 
         /*
@@ -29,8 +23,19 @@ namespace MobiControlApi
               "FolderPath" : "",
               "Interval" : "PT30S"
               "IncludeSubFolders" : true
+              "RescanTime": "01:00"
             }      
          */
+
+
+        public MonitorSotiFolderConfig(string folderPath, string interval, bool includeSubFolders)
+        {
+            FolderPath = folderPath;
+            Interval = interval;
+            IncludeSubFolders = includeSubFolders;
+        }
+
+
 
         public static MonitorSotiFolderConfig GetConfigFromJObject(JObject jsonConfig)
         {
