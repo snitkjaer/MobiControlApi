@@ -107,6 +107,25 @@ namespace MobiControlApi
             }
         }
 
+
+        public async Task ResetKnownDeviceIds()
+        {
+            try
+            {
+                // Itterate over monitored groups and return device list
+                foreach (MonitorSotiFolder monitorSotiFolder in listMonitorSotiFolder)
+                {
+                    await monitorSotiFolder.ResetKnownDeviceIds();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                TrackException(ex);
+            }
+        }
+
+
         // Get device id list for all monitored folders
         public async Task<List<string>> GetDeviceIdListAsync()
         {

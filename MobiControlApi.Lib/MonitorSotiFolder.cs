@@ -22,6 +22,8 @@ namespace MobiControlApi
         // Known device Dictionary
         public List<string> listKnownDeviceIds { get; private set; }
 
+        // Allow 1 task to access a shared resource at a time
+        static SemaphoreSlim semaphoreKnowDevices = new SemaphoreSlim(1); 
 
 
         /*
@@ -83,8 +85,12 @@ namespace MobiControlApi
                     // Stop
                     stopWatch.Stop();
 
-                    DeviceListDiff(listCurrentDevices, listKnownDeviceIds, out listAddedDevices, out listRemovedDevices);
+                    // Make sure listKnownDeviceIds is only accessed from one place
+                    await semaphoreKnowDevices.WaitAsync(); // Wait for the semaphore to become available
 
+
+                    // Check devices add / devices removed
+                    DeviceListDiff(listCurrentDevices, listKnownDeviceIds, out listAddedDevices, out listRemovedDevices);
 
 
                     // If new devices was found
@@ -100,10 +106,8 @@ namespace MobiControlApi
                     // Save list of know devices
                     listKnownDeviceIds = listCurrentDevices;
 
-                    // Stop
-                    stopWatch.Stop();
-
-
+                
+                    // Prep event log
                     var properties = new Dictionary<string, string>
                              {
                                  { "GroupPath", monitorSotiGroupConfig.FolderPath },
@@ -122,6 +126,10 @@ namespace MobiControlApi
                     Log("Exception scanning SOTI groupe '" + monitorSotiGroupConfig.FolderPath + "' in " + stopWatch.Elapsed.ToString(), SeverityLevel.Error);
                     TrackException(ex);
                 }
+                finally
+                {
+                    semaphoreKnowDevices.Release(); // Release the semaphore
+                }
 
 
                 // Wait before scanning again
@@ -132,6 +140,18 @@ namespace MobiControlApi
 
 
             return 0;
+        }
+
+        public async Task ResetKnownDeviceIds()
+        {
+            // Make sure listKnownDeviceIds is only accessed from one place
+            await semaphoreKnowDevices.WaitAsync(); // Wait for the semaphore to become available
+
+            // Reset know devices id list
+            listKnownDeviceIds = new List<string>();
+
+            // Release the semaphore
+            semaphoreKnowDevices.Release(); 
         }
 
 
