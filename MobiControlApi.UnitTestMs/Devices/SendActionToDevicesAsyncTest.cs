@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MobiControlApi.Devices.DeviceCertificates;
 
 namespace MobiControlApi.UnitTestMs.Devices
 {
@@ -74,6 +75,39 @@ namespace MobiControlApi.UnitTestMs.Devices
             #endregion
         }
 
+
+
+        // Renew a SCEP certificate installed by SOTI
+        [DataTestMethod]
+        [DataRow(TestData.deviceImei, TestData.certificateRenewSerialNumber)]
+        public async Task RenewDeviceCertificateTest(string imei, string certSerialNumber)
+        {
+            #region Arrange
+            Api mcApi = new Api(mobiControlApiConfig, null, token, httpClient);
+            BasicDevice basicDevice = await mcApi.GetBasicDeviceOnImeiAsync(imei);
+            DeviceCertificate deviceCertificate = null;
+            BasicDeviceWithCertificates basicDeviceWithCertificates = await BasicDeviceWithCertificates.GetBasicDeviceWithCertificates(basicDevice, mcApi);
+            foreach (DeviceCertificate cer in basicDeviceWithCertificates.deviceCertificates)
+            {
+                if( cer.SerialNumber == certSerialNumber)
+                {
+                    deviceCertificate = cer;
+                    break;
+                }
+            }
+            #endregion
+
+            #region Act
+            RenewDeviceCertificate renewDeviceCertificate = new RenewDeviceCertificate(mcApi);
+
+            bool result = await renewDeviceCertificate.Renew(basicDevice.DeviceId, deviceCertificate.ReferenceId);
+
+            #endregion
+
+            #region Assert
+            Assert.IsTrue(result);
+            #endregion
+        }
 
     }
 }

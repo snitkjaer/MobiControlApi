@@ -49,18 +49,18 @@ namespace MobiControlApi
 
 
 
-            // Set multiple custom attributes
-            /*
+        // Set multiple custom attributes
+        /*
+            {
+                "Attributes": [
                 {
-                    "Attributes": [
-                    {
-                        "AttributeName": "RkCertStatus",
-                        "AttributeValue": "hejhh"
-                    }
-                    ]
+                    "AttributeName": "RkCertStatus",
+                    "AttributeValue": "hejhh"
                 }
-             */
-            private async Task<bool> SetCustomAttributeAsync(string deviceId, JObject jsonCustomAttributes)
+                ]
+            }
+         */
+        private async Task<bool> SetCustomAttributeAsync(string deviceId, JObject jsonCustomAttributes)
         {
             // PUT /devices/{deviceId}/customAttributes
 
