@@ -203,24 +203,37 @@ namespace MobiControlApi
             httpClientInstance.DefaultRequestHeaders.Add("Authorization", "Bearer " + Token);
         }
 
+        private readonly SemaphoreSlim semaphoreSlimSendSotiRequest = new SemaphoreSlim(1, 1);
+
 
         // Send request to SOTI API
         private async Task<HttpResponseMessage> SendSotiRequest(HttpRequestMessage request)
         {
+            await semaphoreSlim.WaitAsync(); // Asynchronously wait to enter the semaphore
+
             // Define response message
             HttpResponseMessage response;
 
-            await UpdateHeaders();
-
-            // Call SOTI MobiControl
-            response = await httpClientInstance.SendAsync(request, cancellationToken);
-
-            // If error log it
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                Log("Http request error with status code " + response.StatusCode + " with reason" +
-                    " " + response.ReasonPhrase, SeverityLevel.Error);
+                await UpdateHeaders();
+
+                // Call SOTI MobiControl and other logic here
+                response = await httpClientInstance.SendAsync(request, cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    // Log the error
+                   Log(EncodeUrl(request.RequestUri.AbsoluteUri) + " returned " + response.StatusCode + " with reason" +
+                                          " " + response.ReasonPhrase, SeverityLevel.Error);
+                }
             }
+            finally
+            {
+                semaphoreSlim.Release(); // Release the semaphore
+            }
+
+
 
             return response;
 
