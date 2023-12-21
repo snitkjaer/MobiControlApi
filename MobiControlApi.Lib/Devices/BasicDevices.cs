@@ -36,6 +36,8 @@ namespace MobiControlApi
 
             }
 
+            Log("Found " + listDevices.Count.ToString() + " devices in group '" + deviceGroupPath + "' with filter '" + filter + "'", SeverityLevel.Verbose);
+
             return listDevices;
 
         }
@@ -133,8 +135,13 @@ namespace MobiControlApi
 
             if(!String.IsNullOrWhiteSpace(deviceImei))
             {
-                var devices = await GetBasicDeviceListJsonSearchDbAsync("/", "IMEI_MEID_ESN=\"" + deviceImei + "\"", true, false, 0, 1);
-                if(devices.Count == 1)
+                // This does not seem to work anymore
+                //var devices = await GetBasicDeviceListJsonSearchDbAsync("/", "IMEI_MEID_ESN=\"" + deviceImei + "\"", true, false, 0, 1);
+                var basicDevices = await GetBasicDeviceListFromSotiAsync("/", true);
+
+                var devices = basicDevices.Where(d => d.ImeiMeidEsn == deviceImei).ToList();
+
+                if (devices.Count == 1)
                     basicDevice = devices.First();
 
                 if (basicDevice == null)

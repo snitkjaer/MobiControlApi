@@ -16,14 +16,12 @@ namespace MobiControlApi.UnitTestMs.Devices
         HttpClient httpClient = new HttpClient();
 
         [DataTestMethod]
-        [DataRow("/", true)]
-        [DataRow(TestData.groupName, true)]
-        public async Task GetBasicDeviceListJsonSearchDbAsyncTest_Count(string groupPath, bool includeSubGroups)
+        [DataRow("/", true, TestData.numberOfDevicesRoot)]
+        [DataRow(TestData.groupName, true, TestData.numberOfDevicesGroup)]
+        public async Task GetBasicDeviceListJsonSearchDbAsyncTest_Count(string groupPath, bool includeSubGroups, int numberOfDevices)
         {
             #region Arrange
             Api mcApi = new Api(mobiControlApiConfig, token, httpClient);
-            String responseJson = await mcApi.GetDeviceListJsonSearchDbAsync(groupPath, null, true, false, 0, 1000);
-            int noDevices = Regex.Matches(responseJson, "DeviceId").Count;
             #endregion
 
             #region Act
@@ -31,7 +29,7 @@ namespace MobiControlApi.UnitTestMs.Devices
             #endregion
 
             #region Assert
-            Assert.AreEqual(noDevices, devices.Count);
+            Assert.AreEqual(numberOfDevices, devices.Count);
             #endregion
         }
     }
