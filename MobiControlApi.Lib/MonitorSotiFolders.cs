@@ -3,10 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.ApplicationInsights.DataContracts;
+
 using System.Net.Http;
 
 namespace MobiControlApi
@@ -33,11 +30,10 @@ namespace MobiControlApi
         public List<MonitorSotiFolder> listMonitorSotiFolder;
 
         // Constructor
-        public MonitorSotiFolders(MobiControlApiConfig mobiControlApiConfig, List<MonitorSotiFolderConfig> listMonitorSotiFolderConfig, TelemetryClient tc, CancellationToken token, HttpClient httpClient)
+        public MonitorSotiFolders(MobiControlApiConfig mobiControlApiConfig, List<MonitorSotiFolderConfig> listMonitorSotiFolderConfig, CancellationToken token, HttpClient httpClient)
         {
             this.token = token;
             this.httpClient = httpClient;
-            this.tc = tc;
             this.listMonitorSotiFolderConfig = listMonitorSotiFolderConfig;
             this.MobiControlApiConfig = mobiControlApiConfig;
 
@@ -48,7 +44,7 @@ namespace MobiControlApi
             foreach (MonitorSotiFolderConfig folder in listMonitorSotiFolderConfig)
             {
                 // Start monitoring folder but dont pass any know devices i.e. on start (or restart) all will come up as new devices
-                MonitorSotiFolder monitorSotiGroup = new MonitorSotiFolder(folder, null, tc, token);
+                MonitorSotiFolder monitorSotiGroup = new MonitorSotiFolder(folder, null, token);
                 monitorSotiGroup.NewDeviceList += MonitorSotiGroup_NewDeviceList;
                 monitorSotiGroup.RemovedDeviceList += MonitorSotiGroup_RemovedDeviceList;
                 listMonitorSotiFolder.Add(monitorSotiGroup);
@@ -59,7 +55,7 @@ namespace MobiControlApi
             if (mcApi == null)
             {
                 // Validate connnection to the MC server
-                mcApi = new Api(MobiControlApiConfig, tc, token, httpClient);
+                mcApi = new Api(MobiControlApiConfig, token, httpClient);
 
             }
 
@@ -82,7 +78,7 @@ namespace MobiControlApi
                 if (mcApi == null)
                 {
                     // Validate connnection to the MC server
-                    mcApi = new Api(MobiControlApiConfig, tc, token, httpClient);
+                    mcApi = new Api(MobiControlApiConfig, token, httpClient);
 
                 }
 
@@ -135,7 +131,7 @@ namespace MobiControlApi
             {
                 if (mcApi == null)
                     // Validate connnection to the MC server
-                    mcApi = new Api(MobiControlApiConfig, tc, token, httpClient);
+                    mcApi = new Api(MobiControlApiConfig, token, httpClient);
 
                 // Itterate over monitored groups and return device list
                 foreach (var group in listMonitorSotiFolder)
@@ -164,7 +160,7 @@ namespace MobiControlApi
             {
                 if (mcApi == null)
                     // Validate connnection to the MC server
-                    mcApi = new Api(MobiControlApiConfig, tc, token, httpClient);
+                    mcApi = new Api(MobiControlApiConfig, token, httpClient);
 
                 // Itterate over monitored groups and return device dict
                 foreach (var group in listMonitorSotiFolder)
@@ -190,7 +186,7 @@ namespace MobiControlApi
             {
                 if (mcApi == null)
                     // Validate connnection to the MC server
-                    mcApi = new Api(MobiControlApiConfig, tc, token, httpClient);
+                    mcApi = new Api(MobiControlApiConfig, token, httpClient);
 
                 // Itterate over monitored groups and return device dict
                 foreach (var group in listMonitorSotiFolder)

@@ -1,80 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.Extensions.Logging;
+using NLog;
 
 namespace MobiControlApi
 {
     public class LogAbstraction
     {
-        // Alow setting but not directly using as we want this to be an abstraction that works witout it
-        public TelemetryClient tc { get; set; }
-        public bool LogToConsole = true;
+        private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
         public void Log(string message, SeverityLevel severityLevel)
         {
-            if (LogToConsole)
-            {
-                if (severityLevel != SeverityLevel.Verbose)
-                    Console.WriteLine(DateTime.Now + " [" + severityLevel.ToString() + "] - " + message);
-            }
-
-            if (tc != null)
-                tc.TrackTrace(message, SeverityLevel.Verbose);
+            logger.Log(MapSeverityLevelToNLogLevel(severityLevel), message);
         }
 
-        public TelemetryClient GetTC()
-        {
-            return tc;
-        }
 
         public void TrackException(Exception ex)
         {
-            if (tc != null)
-                tc.TrackException(ex);
-        }
-
-        public void LogMetric(string name, double value)
-        {
-            if (tc != null)
-                tc.GetMetric(name).TrackValue(value);
-        }
-
-        public void TrackEvent(string evenName)
-        {
-            if (tc != null)
-                tc.TrackEvent(evenName);
-        }
-
-        public void TrackEvent(string eventName, TimeSpan elapsed, IDictionary<string, string> properties = null)
-        {
-            if (tc != null)
-            {
-                var telemetry = new EventTelemetry(eventName);
-                telemetry.Metrics.Add("Elapsed", elapsed.TotalMilliseconds);
-
-                if (properties != null)
-                {
-                    foreach (var property in properties)
-                    {
-                        telemetry.Properties.Add(property.Key, property.Value);
-                    }
-                }
-
-                tc.TrackEvent(telemetry);
-            }
-            if (LogToConsole)
-            {
-                Console.WriteLine(DateTime.Now + " [Event] - " + eventName + " in " + elapsed.Milliseconds.ToString() + " ms " + string.Join(";", properties));
-            }
-
+            logger.Error(ex, "ex");;
         }
 
         public static string DCSeriallNumberToString(uint ser)
         {
             return "device certificate S/N " + ser.ToString() + "(0x" + ser.ToString("X") + ")";
         }
+
+        public static NLog.LogLevel MapSeverityLevelToNLogLevel(SeverityLevel severityLevel)
+        {
+            switch (severityLevel)
+            {
+                case SeverityLevel.Verbose:
+                    return NLog.LogLevel.Debug; // Or LogLevel.Trace, if you prefer more detailed logging
+                case SeverityLevel.Information:
+                    return NLog.LogLevel.Info;
+                case SeverityLevel.Warning:
+                    return NLog.LogLevel.Warn;
+                case SeverityLevel.Error:
+                    return NLog.LogLevel.Error;
+                case SeverityLevel.Critical:
+                    return NLog.LogLevel.Fatal;
+                default:
+                    throw new ArgumentException("Invalid severity level");
+            }
+        }
+
+
+        public void TrackEvent(string eventName, TimeSpan elapsed, IDictionary<string, string> properties = null)
+        {
+            logger.Info(" [Event] - " + eventName + " in " + elapsed.Milliseconds.ToString() + " ms " + string.Join(";", properties));   
+
+        }
+    }
+
+    public enum SeverityLevel
+    {
+        Verbose,
+        Information,
+        Warning,
+        Error,
+        Critical
     }
 
 

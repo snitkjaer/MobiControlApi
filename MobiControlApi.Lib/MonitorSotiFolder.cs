@@ -3,10 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.ApplicationInsights.DataContracts;
+
 
 namespace MobiControlApi
 
@@ -36,14 +33,13 @@ namespace MobiControlApi
             }      
          */
 
-        public MonitorSotiFolder(string jsonConfig, List<string> listStartKnownDeviceIds, TelemetryClient tc, CancellationToken token)
-            :this (MonitorSotiFolderConfig.GetConfigFromJsonString(jsonConfig), listStartKnownDeviceIds, tc,token)
+        public MonitorSotiFolder(string jsonConfig, List<string> listStartKnownDeviceIds, CancellationToken token)
+            :this (MonitorSotiFolderConfig.GetConfigFromJsonString(jsonConfig), listStartKnownDeviceIds, token)
         {}
 
-        public MonitorSotiFolder(MonitorSotiFolderConfig config, List<string> listStartKnownDeviceIds, TelemetryClient tc, CancellationToken token)
+        public MonitorSotiFolder(MonitorSotiFolderConfig config, List<string> listStartKnownDeviceIds, CancellationToken token)
         {
             this.token = token;
-            this.tc = tc;
 
             // Import ćonfig from json
             monitorSotiGroupConfig = config;

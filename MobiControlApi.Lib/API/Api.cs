@@ -4,12 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.ApplicationInsights.DataContracts;
 using System.Net;
 
 namespace MobiControlApi
@@ -29,10 +23,9 @@ namespace MobiControlApi
         // 
 
         // Main constructor
-        public Api(MobiControlApiConfig mobiControlApiConfig, TelemetryClient tc, CancellationToken cancellationToken, HttpClient httpClient)
+        public Api(MobiControlApiConfig mobiControlApiConfig, CancellationToken cancellationToken, HttpClient httpClient)
         {
             // Save
-            this.tc = tc;
             this.httpClientInstance = httpClient;
             this.cancellationToken = cancellationToken;
 

@@ -23,7 +23,7 @@ namespace MobiControlApi.UnitTestMs.Devices
         public async Task GetBasicDeviceListJsonSearchDbAsyncTest_CountRoot(string groupPath, bool includeSubGroups)
         {
             #region Arrange
-            Api mcApi = new Api(mobiControlApiConfig, null, token, httpClient);
+            Api mcApi = new Api(mobiControlApiConfig, token, httpClient);
             String responseJson = await mcApi.GetDeviceListJsonSearchDbAsync(groupPath, null, includeSubGroups, false, 0, 1000);
             int noDevices = Regex.Matches(responseJson, "DeviceId").Count;
             #endregion

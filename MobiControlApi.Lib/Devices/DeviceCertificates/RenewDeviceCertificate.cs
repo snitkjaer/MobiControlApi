@@ -1,10 +1,5 @@
-﻿using System;
-using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using Microsoft.ApplicationInsights.DataContracts;
-using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
-using System.Runtime.ConstrainedExecution;
+﻿using System.Threading.Tasks;
+
 
 namespace MobiControlApi.Devices.DeviceCertificates
 {
@@ -25,7 +20,7 @@ namespace MobiControlApi.Devices.DeviceCertificates
             string action = "{  \"ActionKind\": \"Renew\"}";
 
 
-            Log($"Renewing device certificate {referenceId} for device {deviceId}", SeverityLevel.Verbose);
+            Log($"Renewing device certificate {referenceId} for device {deviceId}", SeverityLevel.Information);
 
             // Call GetJsonAsync
             return await api.PostJsonAsync(resourcePath, action);

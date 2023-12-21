@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using Microsoft.ApplicationInsights.DataContracts;
-using System.Threading;
-using System.Linq;
 
 namespace MobiControlApi
 {

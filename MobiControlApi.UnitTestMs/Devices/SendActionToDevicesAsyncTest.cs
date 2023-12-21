@@ -21,7 +21,7 @@ namespace MobiControlApi.UnitTestMs.Devices
         public async Task SendActionToDevicesAsyncTest_SyncFilesNows(string imei)
         {
             #region Arrange
-            Api mcApi = new Api(mobiControlApiConfig, null, token, httpClient);
+            Api mcApi = new Api(mobiControlApiConfig, token, httpClient);
 
             #endregion
 
@@ -41,7 +41,7 @@ namespace MobiControlApi.UnitTestMs.Devices
         public async Task SendActionToDevicesAsyncTest_CheckIn(string imei)
         {
             #region Arrange
-            Api mcApi = new Api(mobiControlApiConfig, null, token, httpClient);
+            Api mcApi = new Api(mobiControlApiConfig, token, httpClient);
 
             #endregion
 
@@ -61,7 +61,7 @@ namespace MobiControlApi.UnitTestMs.Devices
         public async Task InstallCertificateOnDevice(string imei, string p12FilePath, string certificatePassword)
         {
             #region Arrange
-            Api mcApi = new Api(mobiControlApiConfig, null, token, httpClient);
+            Api mcApi = new Api(mobiControlApiConfig, token, httpClient);
 
             #endregion
 
@@ -83,7 +83,7 @@ namespace MobiControlApi.UnitTestMs.Devices
         public async Task RenewDeviceCertificateTest(string imei, string certSerialNumber)
         {
             #region Arrange
-            Api mcApi = new Api(mobiControlApiConfig, null, token, httpClient);
+            Api mcApi = new Api(mobiControlApiConfig, token, httpClient);
             BasicDevice basicDevice = await mcApi.GetBasicDeviceOnImeiAsync(imei);
             DeviceCertificate deviceCertificate = null;
             BasicDeviceWithCertificates basicDeviceWithCertificates = await BasicDeviceWithCertificates.GetBasicDeviceWithCertificates(basicDevice, mcApi);

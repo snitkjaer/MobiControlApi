@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text.RegularExpressions;
+﻿using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,7 +18,7 @@ namespace MobiControlApi.UnitTestMs.Devices
         public async Task GetBasicDeviceOnImeiAsyncTest_Test(string imei, bool found)
         {
             #region Arrange
-            Api mcApi = new Api(mobiControlApiConfig, null, token, httpClient);
+            Api mcApi = new Api(mobiControlApiConfig, token, httpClient);
 
             #endregion
 

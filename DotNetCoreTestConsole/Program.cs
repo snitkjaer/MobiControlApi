@@ -36,7 +36,7 @@ namespace DotNetCoreTestConsole
 
 
                 // SOTI Server API
-                Api mcApi = new Api(mobiControlApiConfig, null, cts.Token, httpClient);
+                Api mcApi = new Api(mobiControlApiConfig, cts.Token, httpClient);
 
                 BasicDeviceWithCertificatesList basicDevicsWithCerts = new BasicDeviceWithCertificatesList(mcApi);
 

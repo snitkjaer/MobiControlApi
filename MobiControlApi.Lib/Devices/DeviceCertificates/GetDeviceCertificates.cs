@@ -1,9 +1,6 @@
-﻿using System;
-using Microsoft.ApplicationInsights.DataContracts;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace MobiControlApi.Devices.DeviceCertificates
 {

@@ -21,7 +21,7 @@ namespace MobiControlApi.UnitTestMs.Devices
         public async Task GetDeviceListJsonSearchDbAsyncTest_Count(string groupPath, bool includeSubGroups, int deviceCount)
         {
             #region Arrange
-            Api mcApi = new Api(mobiControlApiConfig, null, token, httpClient);
+            Api mcApi = new Api(mobiControlApiConfig, token, httpClient);
 
             #endregion
 

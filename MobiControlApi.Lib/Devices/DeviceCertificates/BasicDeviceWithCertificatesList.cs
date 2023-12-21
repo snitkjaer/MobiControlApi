@@ -1,7 +1,4 @@
-﻿using System;
-using Microsoft.ApplicationInsights.DataContracts;
-using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MobiControlApi.Devices.DeviceCertificates
