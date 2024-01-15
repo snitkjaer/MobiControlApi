@@ -16,6 +16,9 @@ namespace MobiControlApi
         [JsonProperty("IMEI_MEID_ESN", NullValueHandling = NullValueHandling.Ignore)]
         public string ImeiMeidEsn { get; set; }
 
+        [JsonProperty("HardwareSerialNumber", NullValueHandling = NullValueHandling.Ignore)]
+        public string HardwareSerialNumber { get; set; }
+
         [JsonProperty("Path", NullValueHandling = NullValueHandling.Ignore)]
         public string Path { get; set; }
 
